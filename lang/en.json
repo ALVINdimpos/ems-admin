@@ -1,0 +1,73 @@
+{
+  "common": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "home": {
+    "title": "Home Page",
+    "description": "This is the home page",
+    "welcome": "Welcome to EMS"
+  },
+  "about": {
+    "title": "About Us",
+    "description": "Learn more about our Employee Management System"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "Get in touch with us"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "register": {
+      "title": "Register",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in"
+    }
+  },
+  "dashboard": {
+    "events": {
+      "title": "Events",
+      "description": "Manage your events"
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "Page Not Found",
+      "description": "The page you're looking for doesn't exist.",
+      "backHome": "Back to Home"
+    },
+    "500": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred.",
+      "tryAgain": "Try Again"
+    }
+  },
+  "metadata": {
+    "title": "EMS - Employee Management System",
+    "description": "Employee Management System"
+  }
+}

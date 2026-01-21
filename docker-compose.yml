@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  # Next.js Application
+  app:
+    container_name: ems-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_NAME=EMS
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    restart: unless-stopped
+    networks:
+      - ems-network
+
+networks:
+  ems-network:
+    driver: bridge
+
+# volumes:
+#   postgres_data:

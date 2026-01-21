@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # Next.js Application in Development Mode
+  app:
+    container_name: ems-app-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_APP_NAME=EMS
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+    networks:
+      - ems-network
+    command: npm run dev
+
+networks:
+  ems-network:
+    driver: bridge
