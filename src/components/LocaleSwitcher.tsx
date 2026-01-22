@@ -7,19 +7,19 @@ export default function LocaleSwitcher() {
   const { locale, setLocale } = useLocaleContext();
 
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center gap-1 rounded-[10px] border border-white/20 bg-white/5 p-1 backdrop-blur">
       {locales.map((loc) => (
         <button
           key={loc}
           onClick={() => setLocale(loc)}
-          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition-all ${
             locale === loc
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              ? "bg-[#1298E5] text-white shadow-md"
+              : "text-slate-300 hover:text-white hover:bg-white/10"
           }`}
           aria-label={`Switch to ${localeNames[loc]}`}
         >
-          {localeNames[loc]}
+          {loc}
         </button>
       ))}
     </div>
