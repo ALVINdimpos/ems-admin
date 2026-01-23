@@ -163,12 +163,18 @@
   },
   "auth": {
     "login": {
-      "title": "Connexion",
-      "email": "E-mail",
+      "title": "Bienvenue",
+      "subtitle": "Connectez-vous pour accéder à votre compte",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "Entrez votre e-mail",
       "password": "Mot de passe",
-      "submit": "Se connecter",
+      "passwordPlaceholder": "Entrez votre mot de passe",
+      "rememberMe": "Se souvenir de moi",
+      "forgotPassword": "Mot de passe oublié?",
       "noAccount": "Vous n'avez pas de compte?",
-      "signUp": "S'inscrire"
+      "signUp": "S'inscrire",
+      "submitButton": "Se connecter",
+      "contactUs": "Contactez-nous"
     },
     "register": {
       "title": "S'inscrire",
@@ -179,6 +185,22 @@
       "submit": "Créer un compte",
       "hasAccount": "Vous avez déjà un compte?",
       "signIn": "Se connecter"
+    },
+    "registrationForm": {
+      "title": "Titre de l'événement",
+      "titlePlaceholder": "Entrez le titre de l'événement",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "venue": "Lieu",
+      "venuePlaceholder": "Entrez le lieu de l'événement",
+      "expectedAttendees": "Nombre prévu de participants",
+      "expectedAttendeesPlaceholder": "0",
+      "description": "Description",
+      "descriptionPlaceholder": "Description de l'événement",
+      "supportingDocuments": "Documents de support",
+      "dragOrBrowse": "Glissez vos fichiers ou parcourez",
+      "maxFileSize": "Les fichiers jusqu'à 10 Mo sont autorisés",
+      "submitButton": "S'inscrire"
     }
   },
   "dashboard": {

@@ -163,12 +163,17 @@
   },
   "auth": {
     "login": {
-      "title": "Login",
-      "email": "Email",
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue to your account",
+      "email": "Email Address",
+      "emailPlaceholder": "Enter your email",
       "password": "Password",
-      "submit": "Sign In",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
       "noAccount": "Don't have an account?",
-      "signUp": "Sign up"
+      "submitButton": "Sign In",
+      "contactUs": "Contact us"
     },
     "register": {
       "title": "Register",
@@ -179,6 +184,22 @@
       "submit": "Create Account",
       "hasAccount": "Already have an account?",
       "signIn": "Sign in"
+    },
+    "registrationForm": {
+      "title": "Event Title",
+      "titlePlaceholder": "Enter event title",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "venue": "Venue",
+      "venuePlaceholder": "Enter event venue",
+      "expectedAttendees": "Expected Number of Attendees",
+      "expectedAttendeesPlaceholder": "0",
+      "description": "Description",
+      "descriptionPlaceholder": "Event Description",
+      "supportingDocuments": "Supporting Documents",
+      "dragOrBrowse": "Drag your file(s) or browse",
+      "maxFileSize": "Max 10 MB files are allowed",
+      "submitButton": "Register"
     }
   },
   "dashboard": {
