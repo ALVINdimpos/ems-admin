@@ -9,7 +9,7 @@ type ReachSectionProps = {
 
 export function ReachSection({ tLanding }: ReachSectionProps) {
   return (
-    <section className="relative overflow-hidden bg-slate-950 py-16">
+    <section className="relative overflow-hidden bg-slate-950 py-12 sm:py-16">
       <div className="absolute inset-0 opacity-60">
         <Image
           src="/Rectangle%20157978.png"
@@ -20,20 +20,20 @@ export function ReachSection({ tLanding }: ReachSectionProps) {
           priority={false}
         />
       </div>
-      <div className="relative max-w-6xl mx-auto px-4 lg:px-6">
-        <div className="rounded-3xl border border-slate-800/80 bg-slate-950/80 p-10 shadow-2xl backdrop-blur">
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-            <div className="space-y-4">
-              <p className="w-fit rounded-full border border-slate-800 bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-800/80 bg-slate-950/80 p-6 sm:p-8 lg:p-10 shadow-2xl backdrop-blur">
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:items-center">
+            <div className="space-y-3 sm:space-y-4">
+              <p className="w-fit rounded-full border border-slate-800 bg-slate-900 px-3 py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">
                 {tLanding("reach.pill")}
               </p>
-              <h2 className="text-3xl font-bold text-white sm:text-4xl">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white lg:text-4xl">
                 {tLanding("reach.title")}
               </h2>
-              <p className="text-base text-slate-300">
+              <p className="text-sm sm:text-base text-slate-300">
                 {tLanding("reach.description")}
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                 <Link
                   href="/contact"
                   className="rounded-full bg-sky-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:bg-sky-400"
@@ -48,13 +48,13 @@ export function ReachSection({ tLanding }: ReachSectionProps) {
                 </Link>
               </div>
             </div>
-            <div className="relative h-72 w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+            <div className="relative h-64 sm:h-72 w-full overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800 bg-slate-900/70">
               <Image
                 src="/globe.svg"
                 alt={tLanding("reach.globeAlt")}
                 fill
-                sizes="100vw"
-                className="object-contain p-10"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-contain p-6 sm:p-10"
               />
             </div>
           </div>

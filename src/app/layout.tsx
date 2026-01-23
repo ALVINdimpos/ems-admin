@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
+import { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { LocaleProvider } from "@/providers/LocaleProvider";
-
 import "@/styles/globals.css";
 
 const geistSans = Geist({
@@ -16,8 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EMS",
-  description: "Employee Management System",
+  title: {
+    template: "%s | EMS - Event Management System",
+    default: "EMS - Event Management System",
+  },
+  description: "Event Management System",
+  metadataBase: new URL("https://www.qtglobal.rw/"),
 };
 
 export default function RootLayout({

@@ -32,7 +32,7 @@
         "line2": "Vos événements",
         "highlight": "Vers de nouveaux sommets"
       },
-      "description": "De l'accréditation à l'analytique, EMS aide les organisateurs avec des contrôles sécurisés, des badges numériques et des informations en temps réel.",
+      "description": "La plateforme de référence pour les solutions événementielles. De l’accréditation à l’analytique, nous accompagnons les organisateurs d’événements à l’échelle mondiale.",
       "ctaPrimary": "S'inscrire maintenant",
       "imageAlt": "Aperçu du tableau de bord EMS",
       "badges": {
@@ -67,27 +67,27 @@
       "items": {
         "analytics": {
           "title": "Analytique en temps réel",
-          "description": "Surveillez la présence, l'engagement et la capacité avec des tableaux de bord prêts pour la décision."
+          "description": "Surveillez la participation, l’engagement et la capacité grâce à des tableaux de bord en temps réel. Prenez des décisions basées sur les données grâce à des analyses complètes."
         },
         "badging": {
           "title": "Badges numériques",
-          "description": "Créez, distribuez et gérez des badges sécurisés avec QR/NFC pour des entrées fluides."
+          "description": "Créez, distribuez et gérez des badges numériques avec la technologie QR/NFC. Simplifiez les contrôles d’accès et renforcez la sécurité."
         },
         "bulkComms": {
           "title": "Communications de masse",
-          "description": "Envoyez des emails et SMS personnalisés à grande échelle avec rappels automatisés."
+          "description": "Envoyez des e-mails et des SMS personnalisés à des milliers de participants. Rappels automatisés, mises à jour et suivis après l’événement."
         },
         "verification": {
           "title": "Vérification instantanée",
-          "description": "Empêchez la fraude grâce à une validation rapide QR/NFC et un statut d'entrée en temps réel."
+          "description": "Scan rapide QR/NFC avec validation en temps réel. Prévenez la fraude et garantissez un accès sécurisé à chaque point de contrôle."
         },
         "badgeDesign": {
           "title": "Design de badges",
-          "description": "Créez des modèles de badges de marque avec logos sponsors et mises en page personnalisées."
+          "description": "Modèles de badges professionnels entièrement personnalisables. Ajoutez votre identité visuelle, les logos des sponsors et des designs uniques."
         },
         "registration": {
           "title": "Gestion des inscriptions",
-          "description": "Suivez conversions, données démographiques et indicateurs opérationnels avec des analyses avancées."
+          "description": "Inscription des participants simplifiée avec des analyses avancées. Suivez facilement les conversions et les données démographiques."
         }
       }
     },
@@ -112,11 +112,11 @@
         "description": "Une solution complète pour la gestion professionnelle d'événements.",
         "cta": "Demander",
         "highlights": {
-          "item1": "Tableau de bord unifié pour sessions et participants",
-          "item2": "Accréditation automatisée conforme",
-          "item3": "Analyses et rapports en temps réel",
-          "item4": "Marque blanche pour votre identité",
-          "item5": "Support 24/7 et succès dédié"
+          "item1": "Tableau de bord puissant pour la gestion des participants et des sessions",
+          "item2": "Accréditation automatisée avec des workflows de conformité",
+          "item3": "Analyses en temps réel et rapports complets",
+          "item4": "Fonctionnalités en marque blanche pour correspondre à votre identité visuelle",
+          "item5": "Support 24/7 et gestion de compte dédiée"
         }
       }
     },

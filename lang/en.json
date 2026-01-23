@@ -32,7 +32,7 @@
         "line2": "Your Events",
         "highlight": "To New Heights"
       },
-      "description": "From accreditation to analytics, EMS empowers global organizers with secure check-ins, digital badging, and real-time intelligence.",
+      "description": "The premier platform for event solutions. From accreditation to analytics, we empower global event organizers.",
       "ctaPrimary": "Register Now",
       "imageAlt": "EMS dashboard preview",
       "badges": {
@@ -67,27 +67,27 @@
       "items": {
         "analytics": {
           "title": "Real-Time Analytics",
-          "description": "Monitor attendance, engagement, and capacity with live dashboards and decision-ready insights."
+          "description": "Monitor attendance, engagement, and capacity with live dashboards. Make data-driven decisions with comprehensive insights."
         },
         "badging": {
           "title": "Digital Badging",
-          "description": "Create, distribute, and manage secure badges with QR/NFC for streamlined check-ins."
+          "description": "Create, distribute, and manage digital badges with QR/NFC technology. Streamline check-ins and enhance security."
         },
         "bulkComms": {
           "title": "Bulk Communications",
-          "description": "Send personalized email and SMS updates at scale with automated reminders and follow-ups."
+          "description": "Send personalized emails and SMS to thousands. Automated reminders, updates, and post-event follow-ups."
         },
         "verification": {
           "title": "Instant Verification",
-          "description": "Prevent fraud with rapid QR/NFC validation and real-time entry status at every checkpoint."
+          "description": "Fast QR/NFC scanning with real-time validation. Prevent fraud and ensure secure entry at every checkpoint."
         },
         "badgeDesign": {
           "title": "Custom Badge Design",
-          "description": "Build branded badge templates with sponsor logos, unique layouts, and full customization."
+          "description": "Professional badge templates with full customization. Add your branding, sponsor logos, and unique designs."
         },
         "registration": {
           "title": "Registration Management",
-          "description": "Track conversions, demographics, and operational metrics with advanced registration analytics."
+          "description": "Streamlined participant registration with advanced analytics. Track conversions and demographics effortlessly."
         }
       }
     },
@@ -100,11 +100,11 @@
         "description": "Seamless event experience from discovery to participation.",
         "cta": "Download App",
         "highlights": {
-          "item1": "Discover events tailored to interests",
-          "item2": "Digital badges with real-time updates",
-          "item3": "Instant QR/NFC contactless check-in",
-          "item4": "Personalized agenda and navigation",
-          "item5": "Post-event materials and networking"
+          "item1": "Browse and discover events tailored to your interests",
+          "item2": "Mobile app with digital badges and real-time updates",
+          "item3": "Instant contactless check-in with QR/NFC technology",
+          "item4": "Personalized agenda and navigation assistance",
+          "item5": "Post-event materials and networking opportunities"
         }
       },
       "organizers": {
@@ -112,11 +112,11 @@
         "description": "Complete backend for professional event management.",
         "cta": "Request",
         "highlights": {
-          "item1": "Unified dashboard for sessions and attendees",
-          "item2": "Automated accreditation with compliance",
-          "item3": "Real-time analytics and reporting",
-          "item4": "White-label capabilities for your brand",
-          "item5": "24/7 support and dedicated success"
+          "item1": "Powerful dashboard for attendee and session management",
+          "item2": "Automated accreditation with compliance workflows",
+          "item3": "Real-time analytics and comprehensive reporting",
+          "item4": "White-label capabilities to match your brand",
+          "item5": "24/7 support and dedicated account management"
         }
       }
     },
@@ -155,7 +155,7 @@
   },
   "about": {
     "title": "About Us",
-    "description": "Learn more about our Employee Management System"
+    "description": "Learn more about our Event Management System"
   },
   "contact": {
     "title": "Contact Us",
@@ -200,7 +200,7 @@
     }
   },
   "metadata": {
-    "title": "EMS - Employee Management System",
-    "description": "Employee Management System"
+    "title": "EMS - Event Management System",
+    "description": "Event Management System"
   }
 }
