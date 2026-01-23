@@ -20,6 +20,139 @@
     "description": "Ceci est la page d'accueil",
     "welcome": "Bienvenue sur EMS"
   },
+  "landing": {
+    "brand": {
+      "name": "QT Global Software",
+      "product": "Système de gestion d'événements"
+    },
+    "hero": {
+      "pill": "Plateforme événementielle premium",
+      "title": {
+        "line1": "Élevez",
+        "line2": "Vos événements",
+        "highlight": "Vers de nouveaux sommets"
+      },
+      "description": "De l'accréditation à l'analytique, EMS aide les organisateurs avec des contrôles sécurisés, des badges numériques et des informations en temps réel.",
+      "ctaPrimary": "S'inscrire maintenant",
+      "imageAlt": "Aperçu du tableau de bord EMS",
+      "badges": {
+        "analytics": {
+          "title": "Analytique",
+          "subtitle": "Suivez la présence instantanément"
+        },
+        "checkin": {
+          "title": "Check-in en temps réel",
+          "subtitle": "Scan QR/NFC"
+        }
+      },
+      "stats": {
+        "events": {
+          "label": "Événements livrés",
+          "value": "1 250+"
+        },
+        "approval": {
+          "label": "Délai d'approbation moyen",
+          "value": "4,2 min"
+        },
+        "accuracy": {
+          "label": "Précision de présence",
+          "value": "99,4%"
+        }
+      }
+    },
+    "features": {
+      "pill": "Fonctionnalités puissantes",
+      "title": "Tout ce dont vous avez besoin",
+      "subtitle": "Des outils complets pour gérer vos événements, de l'inscription à l'analyse post-événement.",
+      "items": {
+        "analytics": {
+          "title": "Analytique en temps réel",
+          "description": "Surveillez la présence, l'engagement et la capacité avec des tableaux de bord prêts pour la décision."
+        },
+        "badging": {
+          "title": "Badges numériques",
+          "description": "Créez, distribuez et gérez des badges sécurisés avec QR/NFC pour des entrées fluides."
+        },
+        "bulkComms": {
+          "title": "Communications de masse",
+          "description": "Envoyez des emails et SMS personnalisés à grande échelle avec rappels automatisés."
+        },
+        "verification": {
+          "title": "Vérification instantanée",
+          "description": "Empêchez la fraude grâce à une validation rapide QR/NFC et un statut d'entrée en temps réel."
+        },
+        "badgeDesign": {
+          "title": "Design de badges",
+          "description": "Créez des modèles de badges de marque avec logos sponsors et mises en page personnalisées."
+        },
+        "registration": {
+          "title": "Gestion des inscriptions",
+          "description": "Suivez conversions, données démographiques et indicateurs opérationnels avec des analyses avancées."
+        }
+      }
+    },
+    "solutions": {
+      "pill": "Solutions pour tous",
+      "title": "Conçu pour votre succès",
+      "subtitle": "Que vous soyez participant ou organisateur, nous couvrons vos besoins avec des flux adaptés.",
+      "attendees": {
+        "title": "Pour les participants",
+        "description": "Une expérience fluide de la découverte à la participation.",
+        "cta": "Télécharger l'application",
+        "highlights": {
+          "item1": "Découvrez des événements selon vos intérêts",
+          "item2": "Badges numériques avec mises à jour en temps réel",
+          "item3": "Check-in sans contact QR/NFC instantané",
+          "item4": "Agenda personnalisé et navigation",
+          "item5": "Ressources post-événement et réseautage"
+        }
+      },
+      "organizers": {
+        "title": "Pour les organisateurs",
+        "description": "Une solution complète pour la gestion professionnelle d'événements.",
+        "cta": "Demander",
+        "highlights": {
+          "item1": "Tableau de bord unifié pour sessions et participants",
+          "item2": "Accréditation automatisée conforme",
+          "item3": "Analyses et rapports en temps réel",
+          "item4": "Marque blanche pour votre identité",
+          "item5": "Support 24/7 et succès dédié"
+        }
+      }
+    },
+    "reach": {
+      "pill": "Fiable dans le monde",
+      "title": "Taillé pour l'échelle, prêt pour votre région",
+      "description": "Déployez des accréditations sécurisées, des check-ins rapides et des analyses partout où vous opérez. Conçu pour la conformité globale, le multilingue et des volumes élevés.",
+      "ctaPrimary": "Parler aux ventes",
+      "ctaSecondary": "En savoir plus",
+      "backgroundAlt": "Arrière-plan de portée mondiale",
+      "globeAlt": "Icône globe"
+    },
+    "footer": {
+      "description": "Plateforme d'entreprise de confiance mondiale. Rationalisez l'accréditation, la sécurité et l'analytique avec une technologie avancée.",
+      "quickLinksTitle": "Liens rapides",
+      "socialLabel": "lien social",
+      "contact": {
+        "title": "Nous contacter",
+        "address": "Telecom House, 8KG 7 AVE",
+        "phoneLabel": "Appel",
+        "phone": "+250 788 309 936"
+      },
+      "links": {
+        "about": "À propos",
+        "blog": "Blog",
+        "solutions": "Nos solutions",
+        "careers": "Carrières"
+      },
+      "legal": {
+        "privacy": "Politique de confidentialité",
+        "terms": "Conditions d'utilisation",
+        "cookies": "Politique de cookies"
+      },
+      "copyright": "Droits d'auteur {year} QT Global Software. Tous droits réservés."
+    }
+  },
   "about": {
     "title": "À propos de nous",
     "description": "En savoir plus sur notre système de gestion des employés"
@@ -30,12 +163,18 @@
   },
   "auth": {
     "login": {
-      "title": "Connexion",
-      "email": "E-mail",
+      "title": "Bienvenue",
+      "subtitle": "Connectez-vous pour accéder à votre compte",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "Entrez votre e-mail",
       "password": "Mot de passe",
-      "submit": "Se connecter",
+      "passwordPlaceholder": "Entrez votre mot de passe",
+      "rememberMe": "Se souvenir de moi",
+      "forgotPassword": "Mot de passe oublié?",
       "noAccount": "Vous n'avez pas de compte?",
-      "signUp": "S'inscrire"
+      "signUp": "S'inscrire",
+      "submitButton": "Se connecter",
+      "contactUs": "Contactez-nous"
     },
     "register": {
       "title": "S'inscrire",
@@ -46,6 +185,22 @@
       "submit": "Créer un compte",
       "hasAccount": "Vous avez déjà un compte?",
       "signIn": "Se connecter"
+    },
+    "registrationForm": {
+      "title": "Titre de l'événement",
+      "titlePlaceholder": "Entrez le titre de l'événement",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "venue": "Lieu",
+      "venuePlaceholder": "Entrez le lieu de l'événement",
+      "expectedAttendees": "Nombre prévu de participants",
+      "expectedAttendeesPlaceholder": "0",
+      "description": "Description",
+      "descriptionPlaceholder": "Description de l'événement",
+      "supportingDocuments": "Documents de support",
+      "dragOrBrowse": "Glissez vos fichiers ou parcourez",
+      "maxFileSize": "Les fichiers jusqu'à 10 Mo sont autorisés",
+      "submitButton": "S'inscrire"
     }
   },
   "dashboard": {

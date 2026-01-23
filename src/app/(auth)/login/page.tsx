@@ -28,23 +28,16 @@ export default function LoginPage() {
         </div>
         <div className="text-center mb-5">
           <h1 className="text-xl sm:text-[22px] font-bold text-white mb-1">
-            Welcome Back
+            {t("title")}
           </h1>
-          <p className="text-white/70 text-xs sm:text-sm">
-            Sign in to continue to your account
-          </p>
+          <p className="text-white/70 text-xs sm:text-sm">{t("subtitle")}</p>
         </div>
 
         <LoginForm />
-
         <div className="mt-5">
-          <p className="text-center text-white/60 text-sm">
-            {t("noAccount")}{" "}
-            <a href="#" className="text-blue-400 hover:underline">
-              Register
-            </a>
+          <p className="text-center text-white/40 text-xs mt-3">
+            {t("contactUs")}
           </p>
-          <p className="text-center text-white/40 text-xs mt-3">Contact us</p>
         </div>
       </section>
     </main>

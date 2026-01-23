@@ -9,6 +9,7 @@ interface IModalProps {
   children: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
   showCloseButton?: boolean;
+  backdropClassName?: string;
 }
 
 export default function Modal({
@@ -18,6 +19,7 @@ export default function Modal({
   children,
   size = "md",
   showCloseButton = true,
+  backdropClassName,
 }: IModalProps) {
   useEffect(() => {
     if (isOpen) {
@@ -49,8 +51,9 @@ export default function Modal({
       aria-labelledby={title ? "modal-title" : undefined}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black bg-opacity-50" />
-
+      <div
+        className={`absolute inset-0 ${backdropClassName || "bg-black bg-opacity-50"}`}
+      />
       {/* Modal Content */}
       <article
         className={`relative bg-white rounded-lg shadow-xl ${sizeStyles[size]} w-full mx-4 max-h-[90vh] overflow-y-auto`}

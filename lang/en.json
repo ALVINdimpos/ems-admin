@@ -20,6 +20,139 @@
     "description": "This is the home page",
     "welcome": "Welcome to EMS"
   },
+  "landing": {
+    "brand": {
+      "name": "QT Global Software",
+      "product": "Event Management System"
+    },
+    "hero": {
+      "pill": "Premier event platform",
+      "title": {
+        "line1": "Elevate",
+        "line2": "Your Events",
+        "highlight": "To New Heights"
+      },
+      "description": "From accreditation to analytics, EMS empowers global organizers with secure check-ins, digital badging, and real-time intelligence.",
+      "ctaPrimary": "Register Now",
+      "imageAlt": "EMS dashboard preview",
+      "badges": {
+        "analytics": {
+          "title": "Analytics",
+          "subtitle": "Track attendance instantly"
+        },
+        "checkin": {
+          "title": "Real-time Check-in",
+          "subtitle": "QR/NFC scanning"
+        }
+      },
+      "stats": {
+        "events": {
+          "label": "Events delivered",
+          "value": "1,250+"
+        },
+        "approval": {
+          "label": "Avg. approval time",
+          "value": "4.2 min"
+        },
+        "accuracy": {
+          "label": "Attendance accuracy",
+          "value": "99.4%"
+        }
+      }
+    },
+    "features": {
+      "pill": "POWERFULL FEATURES",
+      "title": "Everything you need to succeed",
+      "subtitle": "Comprehensive tools for seamless event management from registration to post-event analytics.",
+      "items": {
+        "analytics": {
+          "title": "Real-Time Analytics",
+          "description": "Monitor attendance, engagement, and capacity with live dashboards and decision-ready insights."
+        },
+        "badging": {
+          "title": "Digital Badging",
+          "description": "Create, distribute, and manage secure badges with QR/NFC for streamlined check-ins."
+        },
+        "bulkComms": {
+          "title": "Bulk Communications",
+          "description": "Send personalized email and SMS updates at scale with automated reminders and follow-ups."
+        },
+        "verification": {
+          "title": "Instant Verification",
+          "description": "Prevent fraud with rapid QR/NFC validation and real-time entry status at every checkpoint."
+        },
+        "badgeDesign": {
+          "title": "Custom Badge Design",
+          "description": "Build branded badge templates with sponsor logos, unique layouts, and full customization."
+        },
+        "registration": {
+          "title": "Registration Management",
+          "description": "Track conversions, demographics, and operational metrics with advanced registration analytics."
+        }
+      }
+    },
+    "solutions": {
+      "pill": "Solutions for everyone",
+      "title": "Built for your success",
+      "subtitle": "Whether you are an attendee or event organizer, we have you covered with tailored workflows.",
+      "attendees": {
+        "title": "For Attendees",
+        "description": "Seamless event experience from discovery to participation.",
+        "cta": "Download App",
+        "highlights": {
+          "item1": "Discover events tailored to interests",
+          "item2": "Digital badges with real-time updates",
+          "item3": "Instant QR/NFC contactless check-in",
+          "item4": "Personalized agenda and navigation",
+          "item5": "Post-event materials and networking"
+        }
+      },
+      "organizers": {
+        "title": "For Event Organizers",
+        "description": "Complete backend for professional event management.",
+        "cta": "Request",
+        "highlights": {
+          "item1": "Unified dashboard for sessions and attendees",
+          "item2": "Automated accreditation with compliance",
+          "item3": "Real-time analytics and reporting",
+          "item4": "White-label capabilities for your brand",
+          "item5": "24/7 support and dedicated success"
+        }
+      }
+    },
+    "reach": {
+      "pill": "Trusted worldwide",
+      "title": "Built for scale, ready for your region",
+      "description": "Deploy secure accreditation, rapid check-ins, and analytics everywhere you operate. Our platform is designed for global compliance, multi-language experiences, and high-throughput events.",
+      "ctaPrimary": "Talk to sales",
+      "ctaSecondary": "Learn more",
+      "backgroundAlt": "Global reach backdrop",
+      "globeAlt": "Globe icon"
+    },
+    "footer": {
+      "description": "Enterprise platform trusted worldwide. Streamline accreditation, security, and analytics with cutting-edge technology.",
+      "quickLinksTitle": "Quick Links",
+      "socialLabel": "social link",
+      "contact": {
+        "title": "Contact Us",
+        "address": "Telecom House, 8KG 7 AVE",
+        "phoneLabel": "Phone Call",
+        "phone": "+250 788 309 936"
+      },
+      "links": {
+        "about": "About Us",
+        "blog": "Blog",
+        "solutions": "Our Solutions",
+        "careers": "Careers"
+      },
+      "legal": {
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "cookies": "Cookie Policy"
+      },
+      "copyright": "Copyright {year} QT Global Software. All rights reserved."
+    }
+  },
   "about": {
     "title": "About Us",
     "description": "Learn more about our Employee Management System"
@@ -30,12 +163,17 @@
   },
   "auth": {
     "login": {
-      "title": "Login",
-      "email": "Email",
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue to your account",
+      "email": "Email Address",
+      "emailPlaceholder": "Enter your email",
       "password": "Password",
-      "submit": "Sign In",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
       "noAccount": "Don't have an account?",
-      "signUp": "Sign up"
+      "submitButton": "Sign In",
+      "contactUs": "Contact us"
     },
     "register": {
       "title": "Register",
@@ -46,6 +184,22 @@
       "submit": "Create Account",
       "hasAccount": "Already have an account?",
       "signIn": "Sign in"
+    },
+    "registrationForm": {
+      "title": "Event Title",
+      "titlePlaceholder": "Enter event title",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "venue": "Venue",
+      "venuePlaceholder": "Enter event venue",
+      "expectedAttendees": "Expected Number of Attendees",
+      "expectedAttendeesPlaceholder": "0",
+      "description": "Description",
+      "descriptionPlaceholder": "Event Description",
+      "supportingDocuments": "Supporting Documents",
+      "dragOrBrowse": "Drag your file(s) or browse",
+      "maxFileSize": "Max 10 MB files are allowed",
+      "submitButton": "Register"
     }
   },
   "dashboard": {
