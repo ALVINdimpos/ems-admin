@@ -180,7 +180,7 @@ export default function RegistrationForm() {
           </div>
           <p className="text-black text-sm sm:text-base text-center">
             {t("dragOrBrowse")}
-            <span className="text-blue-400 font-semibold">browse</span>
+            <span className="text-blue-400 font-semibold" />
           </p>
           <p className="text-black text-[10px] sm:text-xs text-center">
             {t("maxFileSize")}

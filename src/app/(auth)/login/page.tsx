@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import logo from "../../../../public/qt-global-logo.png";
@@ -18,13 +19,15 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-black/60" />
       <section className="relative z-10 w-full max-w-[370px] max-h-[95vh] overflow-y-auto rounded-2xl border border-white/20 bg-white/10 backdrop-blur-[10px] shadow-xl px-6 py-6 sm:px-8 sm:py-8">
         <div className="flex justify-center mb-4">
-          <Image
-            src={logo}
-            alt="Company Logo"
-            width={140}
-            height={80}
-            className="h-[50px] sm:h-[70px] w-auto object-contain"
-          />
+          <Link href="/">
+            <Image
+              src={logo}
+              alt="Company Logo"
+              width={140}
+              height={80}
+              className="h-[50px] sm:h-[70px] w-auto object-contain"
+            />
+          </Link>
         </div>
         <div className="text-center mb-5">
           <h1 className="text-xl sm:text-[22px] font-bold text-white mb-1">
