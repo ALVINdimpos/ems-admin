@@ -33,7 +33,7 @@
         "highlight": "To New Heights"
       },
       "description": "The premier platform for event solutions. From accreditation to analytics, we empower global event organizers.",
-      "ctaPrimary": "Register Now",
+      "ctaPrimary": "Request Now",
       "imageAlt": "EMS dashboard preview",
       "badges": {
         "analytics": {
@@ -130,7 +130,7 @@
       "globeAlt": "Globe icon"
     },
     "footer": {
-      "description": "Enterprise platform trusted worldwide. Streamline accreditation, security, and analytics with cutting-edge technology.",
+      "description": "EMS platform trusted worldwide. Streamline accreditation, security, and analytics with cutting-edge technology.",
       "quickLinksTitle": "Quick Links",
       "socialLabel": "social link",
       "contact": {
@@ -151,6 +151,125 @@
         "cookies": "Cookie Policy"
       },
       "copyright": "Copyright {year} QT Global Software. All rights reserved."
+    },
+    "about": {
+      "pill": "About Us",
+      "title": "Who We Are",
+      "description": "We are a team of passionate innovators dedicated to transforming how events are managed worldwide.",
+      "imageAlt": "EMS team at work",
+      "badge": {
+        "title": "Trusted by 1000+ Organizations",
+        "subtitle": "Industry-leading platform"
+      },
+      "story": {
+        "title": "Our Story",
+        "paragraph1": "Founded in 2015, QT Global Software started with a simple vision: to make event management seamless, secure, and scalable. What began as a small team of developers has grown into a global company serving clients across 50+ countries.",
+        "paragraph2": "Today, our Event Management System powers some of the world's largest conferences, sports events, and corporate gatherings. We've processed over 500,000 attendees and continue to innovate with cutting-edge technology."
+      },
+      "mission": {
+        "label": "Our Mission",
+        "statement": "To empower event organizers with intelligent tools that create unforgettable experiences while ensuring security, efficiency, and sustainability."
+      },
+      "valuesTitle": "Our Core Values",
+      "valuesSubtitle": "The principles that guide everything we do",
+      "values": {
+        "security": {
+          "title": "Security First",
+          "description": "We prioritize data protection and secure access at every level of our platform."
+        },
+        "global": {
+          "title": "Global Reach",
+          "description": "Built for international scale with multi-language support and regional compliance."
+        },
+        "community": {
+          "title": "Community Focus",
+          "description": "We build lasting relationships with our clients and continuously incorporate their feedback."
+        },
+        "excellence": {
+          "title": "Excellence",
+          "description": "We strive for perfection in every feature, every interaction, and every event we support."
+        }
+      },
+      "stats": {
+        "years": "Years of Experience",
+        "events": "Events Managed",
+        "attendees": "Attendees Processed",
+        "countries": "Countries Served"
+      }
+    },
+    "contact": {
+      "pill": "Contact Us",
+      "title": "Get In Touch",
+      "description": "Have questions or need assistance? We'd love to hear from you. Reach out and our team will respond promptly.",
+      "infoTitle": "Contact Information",
+      "info": {
+        "address": {
+          "label": "Address",
+          "value": "Telecom House, 8KG 7 AVE, Kigali, Rwanda"
+        },
+        "phone": {
+          "label": "Phone",
+          "value": "+250 788 309 936"
+        },
+        "email": {
+          "label": "Email",
+          "value": "info@qtglobalsoftware.com"
+        },
+        "hours": {
+          "label": "Business Hours",
+          "value": "Mon - Fri: 8:00 AM - 6:00 PM"
+        }
+      },
+      "mapPlaceholder": "Map location",
+      "formTitle": "Send Us a Message",
+      "form": {
+        "name": "Your Name",
+        "namePlaceholder": "John Doe",
+        "email": "Email Address",
+        "emailPlaceholder": "john@example.com",
+        "subject": "Subject",
+        "subjectPlaceholder": "How can we help?",
+        "message": "Message",
+        "messagePlaceholder": "Tell us more about your inquiry...",
+        "submit": "Send Message",
+        "sending": "Sending..."
+      }
+    },
+    "faq": {
+      "pill": "FAQ",
+      "title": "Frequently Asked Questions",
+      "description": "Find answers to common questions about our Event Management System.",
+      "items": {
+        "q1": {
+          "question": "What is EMS and how does it work?",
+          "answer": "EMS (Event Management System) is a comprehensive platform for managing events of all sizes. It handles everything from registration and accreditation to check-in, analytics, and post-event reporting. Simply create your event, customize your settings, and let EMS handle the rest."
+        },
+        "q2": {
+          "question": "How secure is the platform?",
+          "answer": "Security is our top priority. We use enterprise-grade encryption, secure QR/NFC technology for check-ins, and comply with international data protection standards including GDPR. All data is stored in secure, redundant data centers."
+        },
+        "q3": {
+          "question": "Can EMS handle large-scale events?",
+          "answer": "Absolutely! EMS is built for scale. We've successfully managed events with over 50,000 attendees and can handle high-throughput check-ins with our real-time scanning technology. Our infrastructure automatically scales to meet demand."
+        },
+        "q4": {
+          "question": "What integrations are available?",
+          "answer": "EMS integrates with popular tools including CRM systems (Salesforce, HubSpot), payment gateways (Stripe, PayPal), email platforms (Mailchimp, SendGrid), and many more. We also offer a robust API for custom integrations."
+        },
+        "q5": {
+          "question": "Do you offer custom branding options?",
+          "answer": "Yes! Our white-label solutions allow you to fully customize the platform with your branding, including logos, colors, and custom domains. Your attendees will experience a seamless branded journey."
+        },
+        "q6": {
+          "question": "What support options are available?",
+          "answer": "We offer 24/7 customer support via email, phone, and live chat. Enterprise clients receive dedicated account managers and priority support. We also provide comprehensive documentation and training resources."
+        }
+      },
+      "cta": {
+        "title": "Still have questions?",
+        "description": "Can't find the answer you're looking for? Our team is here to help.",
+        "button": "Contact Support"
+      }
     }
   },
   "about": {
@@ -186,6 +305,8 @@
       "signIn": "Sign in"
     },
     "registrationForm": {
+      "companyName": "Organisation / Company Name",
+      "companyNamePlaceholder": "Enter company name",
       "title": "Event Title",
       "titlePlaceholder": "Enter event title",
       "startDate": "Start Date",
@@ -194,6 +315,13 @@
       "venuePlaceholder": "Enter event venue",
       "expectedAttendees": "Expected Number of Attendees",
       "expectedAttendeesPlaceholder": "0",
+      "email": "Email",
+      "emailPlaceholder": "email@example.com",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "+250 780 000 000",
+      "registrationType": "Event Registration?",
+      "registrationTypeRegistration": "Event Registration",
+      "registrationTypeManagement": "Event Management",
       "description": "Description",
       "descriptionPlaceholder": "Event Description",
       "supportingDocuments": "Supporting Documents",

@@ -33,7 +33,7 @@
         "highlight": "Vers de nouveaux sommets"
       },
       "description": "La plateforme de référence pour les solutions événementielles. De l’accréditation à l’analytique, nous accompagnons les organisateurs d’événements à l’échelle mondiale.",
-      "ctaPrimary": "S'inscrire maintenant",
+      "ctaPrimary": "Demandez maintenant",
       "imageAlt": "Aperçu du tableau de bord EMS",
       "badges": {
         "analytics": {
@@ -130,7 +130,7 @@
       "globeAlt": "Icône globe"
     },
     "footer": {
-      "description": "Plateforme d'entreprise de confiance mondiale. Rationalisez l'accréditation, la sécurité et l'analytique avec une technologie avancée.",
+      "description": "EMS plateforme de confiance mondiale. Rationalisez l'accréditation, la sécurité et l'analytique avec une technologie avancée.",
       "quickLinksTitle": "Liens rapides",
       "socialLabel": "lien social",
       "contact": {
@@ -151,6 +151,125 @@
         "cookies": "Politique de cookies"
       },
       "copyright": "Droits d'auteur {year} QT Global Software. Tous droits réservés."
+    },
+    "about": {
+      "pill": "À Propos",
+      "title": "Qui Sommes-Nous",
+      "description": "Nous sommes une équipe d'innovateurs passionnés dédiés à transformer la gestion des événements dans le monde entier.",
+      "imageAlt": "L'équipe EMS au travail",
+      "badge": {
+        "title": "Approuvé par 1000+ organisations",
+        "subtitle": "Plateforme leader du secteur"
+      },
+      "story": {
+        "title": "Notre Histoire",
+        "paragraph1": "Fondée en 2015, QT Global Software a commencé avec une vision simple : rendre la gestion d'événements fluide, sécurisée et évolutive. Ce qui a commencé comme une petite équipe de développeurs est devenu une entreprise mondiale servant des clients dans plus de 50 pays.",
+        "paragraph2": "Aujourd'hui, notre système de gestion d'événements alimente certaines des plus grandes conférences, événements sportifs et rassemblements d'entreprise au monde. Nous avons traité plus de 500 000 participants et continuons d'innover avec une technologie de pointe."
+      },
+      "mission": {
+        "label": "Notre Mission",
+        "statement": "Donner aux organisateurs d'événements des outils intelligents qui créent des expériences inoubliables tout en assurant sécurité, efficacité et durabilité."
+      },
+      "valuesTitle": "Nos Valeurs Fondamentales",
+      "valuesSubtitle": "Les principes qui guident tout ce que nous faisons",
+      "values": {
+        "security": {
+          "title": "Sécurité Avant Tout",
+          "description": "Nous priorisons la protection des données et l'accès sécurisé à tous les niveaux de notre plateforme."
+        },
+        "global": {
+          "title": "Portée Mondiale",
+          "description": "Conçu pour une échelle internationale avec support multilingue et conformité régionale."
+        },
+        "community": {
+          "title": "Focus Communauté",
+          "description": "Nous construisons des relations durables avec nos clients et intégrons continuellement leurs retours."
+        },
+        "excellence": {
+          "title": "Excellence",
+          "description": "Nous visons la perfection dans chaque fonctionnalité, chaque interaction et chaque événement que nous supportons."
+        }
+      },
+      "stats": {
+        "years": "Années d'Expérience",
+        "events": "Événements Gérés",
+        "attendees": "Participants Traités",
+        "countries": "Pays Servis"
+      }
+    },
+    "contact": {
+      "pill": "Nous Contacter",
+      "title": "Prenez Contact",
+      "description": "Des questions ou besoin d'aide ? Nous serions ravis de vous entendre. Contactez-nous et notre équipe répondra rapidement.",
+      "infoTitle": "Informations de Contact",
+      "info": {
+        "address": {
+          "label": "Adresse",
+          "value": "Telecom House, 8KG 7 AVE, Kigali, Rwanda"
+        },
+        "phone": {
+          "label": "Téléphone",
+          "value": "+250 788 309 936"
+        },
+        "email": {
+          "label": "E-mail",
+          "value": "info@qtglobalsoftware.com"
+        },
+        "hours": {
+          "label": "Heures d'Ouverture",
+          "value": "Lun - Ven : 8h00 - 18h00"
+        }
+      },
+      "mapPlaceholder": "Emplacement sur la carte",
+      "formTitle": "Envoyez-nous un Message",
+      "form": {
+        "name": "Votre Nom",
+        "namePlaceholder": "Jean Dupont",
+        "email": "Adresse E-mail",
+        "emailPlaceholder": "jean@exemple.com",
+        "subject": "Sujet",
+        "subjectPlaceholder": "Comment pouvons-nous vous aider ?",
+        "message": "Message",
+        "messagePlaceholder": "Dites-nous en plus sur votre demande...",
+        "submit": "Envoyer le Message",
+        "sending": "Envoi..."
+      }
+    },
+    "faq": {
+      "pill": "FAQ",
+      "title": "Questions Fréquemment Posées",
+      "description": "Trouvez des réponses aux questions courantes sur notre système de gestion d'événements.",
+      "items": {
+        "q1": {
+          "question": "Qu'est-ce que l'EMS et comment ça marche ?",
+          "answer": "EMS (Event Management System) est une plateforme complète pour gérer des événements de toutes tailles. Elle gère tout, de l'inscription et l'accréditation au check-in, à l'analyse et au reporting post-événement. Créez simplement votre événement, personnalisez vos paramètres et laissez EMS s'occuper du reste."
+        },
+        "q2": {
+          "question": "Quelle est la sécurité de la plateforme ?",
+          "answer": "La sécurité est notre priorité absolue. Nous utilisons un cryptage de niveau entreprise, une technologie QR/NFC sécurisée pour les check-ins, et nous respectons les normes internationales de protection des données, y compris le RGPD. Toutes les données sont stockées dans des centres de données sécurisés et redondants."
+        },
+        "q3": {
+          "question": "EMS peut-il gérer des événements à grande échelle ?",
+          "answer": "Absolument ! EMS est conçu pour l'échelle. Nous avons géré avec succès des événements de plus de 50 000 participants et pouvons gérer des check-ins à haut débit avec notre technologie de scan en temps réel. Notre infrastructure s'adapte automatiquement à la demande."
+        },
+        "q4": {
+          "question": "Quelles intégrations sont disponibles ?",
+          "answer": "EMS s'intègre avec des outils populaires, notamment les systèmes CRM (Salesforce, HubSpot), les passerelles de paiement (Stripe, PayPal), les plateformes d'e-mail (Mailchimp, SendGrid), et bien d'autres. Nous offrons également une API robuste pour les intégrations personnalisées."
+        },
+        "q5": {
+          "question": "Proposez-vous des options de personnalisation de marque ?",
+          "answer": "Oui ! Nos solutions en marque blanche vous permettent de personnaliser entièrement la plateforme avec votre identité visuelle, y compris les logos, les couleurs et les domaines personnalisés. Vos participants vivront une expérience de marque fluide."
+        },
+        "q6": {
+          "question": "Quelles options de support sont disponibles ?",
+          "answer": "Nous offrons un support client 24/7 par e-mail, téléphone et chat en direct. Les clients entreprise bénéficient de gestionnaires de compte dédiés et d'un support prioritaire. Nous fournissons également une documentation complète et des ressources de formation."
+        }
+      },
+      "cta": {
+        "title": "Encore des questions ?",
+        "description": "Vous ne trouvez pas la réponse que vous cherchez ? Notre équipe est là pour vous aider.",
+        "button": "Contacter le Support"
+      }
     }
   },
   "about": {
@@ -187,6 +306,8 @@
       "signIn": "Se connecter"
     },
     "registrationForm": {
+      "companyName": "Nom de l'entreprise",
+      "companyNamePlaceholder": "Entrez le nom de l'entreprise",
       "title": "Titre de l'événement",
       "titlePlaceholder": "Entrez le titre de l'événement",
       "startDate": "Date de début",
@@ -195,6 +316,13 @@
       "venuePlaceholder": "Entrez le lieu de l'événement",
       "expectedAttendees": "Nombre prévu de participants",
       "expectedAttendeesPlaceholder": "0",
+      "email": "E-mail",
+      "emailPlaceholder": "email@exemple.com",
+      "phoneNumber": "Numéro de téléphone",
+      "phoneNumberPlaceholder": "+250 782 000 000",
+      "registrationType": "Inscription à l'événement ?",
+      "registrationTypeRegistration": "Inscription à l'événement",
+      "registrationTypeManagement": "Gestion d'événement",
       "description": "Description",
       "descriptionPlaceholder": "Description de l'événement",
       "supportingDocuments": "Documents de support",

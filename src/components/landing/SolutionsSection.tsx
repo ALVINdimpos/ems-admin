@@ -1,3 +1,4 @@
+import { Calendar, Check, User } from "lucide-react";
 import Link from "next/link";
 
 import { Solution, TranslateFn } from "@/lib/constants/landing";
@@ -13,65 +14,11 @@ const CheckIcon = ({
 }: {
   className?: string;
   color: string;
-}) => (
-  <svg
-    aria-hidden
-    viewBox="0 0 24 24"
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m5 12.5 4.5 4L19 7.5"
-    />
-  </svg>
-);
+}) => <Check className={className} style={{ color }} />;
 
-const UserIcon = () => (
-  <svg
-    aria-hidden
-    viewBox="0 0 24 24"
-    className="h-9 w-9 text-white"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.8}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M8.5 10.5a3.5 3.5 0 1 0 7 0a3.5 3.5 0 0 0-7 0Z"
-    />
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M5.25 19.5a6.75 6.75 0 0 1 13.5 0"
-    />
-  </svg>
-);
+const UserIcon = () => <User className="h-9 w-9 text-white" />;
 
-const CalendarIcon = () => (
-  <svg
-    aria-hidden
-    viewBox="0 0 24 24"
-    className="h-9 w-9 text-white"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.8}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6.75 6.75h10.5v10.5H6.75z"
-    />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 4.5v3" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M14.5 4.5v3" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 12h5" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 14.75h2.75" />
-  </svg>
-);
+const CalendarIcon = () => <Calendar className="h-9 w-9 text-white" />;
 
 export function SolutionsSection({
   tLanding,

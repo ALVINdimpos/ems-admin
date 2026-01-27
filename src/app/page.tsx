@@ -2,11 +2,16 @@
 
 import { useTranslations } from "next-intl";
 
+import { AboutSection } from "@/components/landing/AboutSection";
+import { ContactSection } from "@/components/landing/ContactSection";
+import { EventsSection } from "@/components/landing/EventsSection";
+import { FaqSection } from "@/components/landing/FAQSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { Navbar } from "@/components/landing/Navbar";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
+import { TrustedPartnersSection } from "@/components/landing/TrustedPartnersSection";
 import { landingContent } from "@/lib/constants/landing";
 
 export default function HomePage() {
@@ -27,9 +32,17 @@ export default function HomePage() {
 
       <FeaturesSection tLanding={tLanding} features={features} />
 
+      <EventsSection />
+
       <SolutionsSection tLanding={tLanding} solutions={solutions} />
 
-      {/* <ReachSection tLanding={tLanding} /> */}
+      <TrustedPartnersSection />
+
+      <AboutSection tLanding={tLanding} />
+
+      <FaqSection tLanding={tLanding} />
+
+      <ContactSection tLanding={tLanding} />
 
       <LandingFooter
         tLanding={tLanding}

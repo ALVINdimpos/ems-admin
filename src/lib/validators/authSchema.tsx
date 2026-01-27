@@ -5,6 +5,12 @@ import validators from "@/lib/validators";
 const { isNotEmpty, isValidLength, isEmail } = validators;
 
 export const registerSchema = z.object({
+  companyName: z
+    .string()
+    .nonempty("Company name is required")
+    .refine((val) => isValidLength(val, 2, 100), {
+      message: "Company name must be 2-100 characters",
+    }),
   title: z
     .string()
     .nonempty("Title is required")
@@ -23,6 +29,21 @@ export const registerSchema = z.object({
   expectedAttendees: z
     .number("Expected number of attendees is required")
     .min(1, "Must be at least 1"),
+  email: z
+    .string()
+    .nonempty("Email is required")
+    .refine(isEmail, { message: "Invalid email address" }),
+  phoneNumber: z
+    .string()
+    .nonempty("Phone number is required")
+    .refine((val) => /^[0-9+()\-\s]{7,20}$/.test(val), {
+      message: "Enter a valid phone number",
+    }),
+  registrationType: z
+    .enum(["registration", "management"])
+    .refine((val) => val !== undefined, {
+      message: "Please select a registration type",
+    }),
   description: z
     .string()
     .refine(isNotEmpty, {

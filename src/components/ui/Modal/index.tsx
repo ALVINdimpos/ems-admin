@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import React, { useEffect } from "react";
 
 interface IModalProps {
@@ -36,15 +37,15 @@ export default function Modal({
   if (!isOpen) return null;
 
   const sizeStyles = {
-    sm: "max-w-md",
-    md: "max-w-lg",
-    lg: "max-w-2xl",
-    xl: "max-w-4xl",
+    sm: "max-w-sm sm:max-w-md",
+    md: "max-w-md sm:max-w-lg",
+    lg: "max-w-lg sm:max-w-xl md:max-w-2xl",
+    xl: "max-w-2xl sm:max-w-3xl md:max-w-4xl",
   };
 
   return (
     <aside
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -56,41 +57,36 @@ export default function Modal({
       />
       {/* Modal Content */}
       <article
-        className={`relative bg-white rounded-lg shadow-xl ${sizeStyles[size]} w-full mx-4 max-h-[90vh] overflow-y-auto`}
+        className={`relative bg-white rounded-lg shadow-xl ${sizeStyles[size]} w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <header className="flex items-center justify-between p-6 border-b border-gray-200">
+          <header className="flex items-center justify-between p-3 sm:p-4 md:p-5 border-b border-gray-200 flex-shrink-0">
             {title && (
-              <h2 id="modal-title" className="text-xl font-semibold text-black">
+              <h2
+                id="modal-title"
+                className="text-base sm:text-lg md:text-xl font-semibold text-black"
+              >
                 {title}
               </h2>
             )}
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 -mr-1"
                 aria-label="Close modal"
               >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             )}
           </header>
         )}
 
         {/* Body */}
-        <section className="p-6">{children}</section>
+        <section className="p-3 sm:p-4 md:p-6 overflow-y-auto flex-1">
+          {children}
+        </section>
       </article>
     </aside>
   );

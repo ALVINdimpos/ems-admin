@@ -1,6 +1,14 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
+import {
+  Building2,
+  Calendar,
+  Mail,
+  MapPin,
+  Phone,
+  Upload,
+  Users,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
@@ -18,184 +26,284 @@ export default function RegistrationForm() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      companyName: "",
       title: "",
       startDate: "",
       endDate: "",
       venue: "",
       expectedAttendees: 0,
+      email: "",
+      phoneNumber: "",
+      registrationType: "management",
       description: "",
     },
   });
 
   const onSubmit = (data: RegisterFormData) => {
-    console.log("Form submitted:", data);
+    console.log("=== Registration Form Data ===");
+    console.log("Company Name:", data.companyName);
+    console.log("Event Title:", data.title);
+    console.log("Start Date:", data.startDate);
+    console.log("End Date:", data.endDate);
+    console.log("Venue:", data.venue);
+    console.log("Expected Attendees:", data.expectedAttendees);
+    console.log("Email:", data.email);
+    console.log("Phone Number:", data.phoneNumber);
+    console.log("Registration Type:", data.registrationType);
+    console.log("Description:", data.description);
+    console.log("Full Data Object:", data);
   };
 
   return (
-    <form
-      className="space-y-4 sm:space-y-5 md:space-y-6"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <div>
-        <label className="text-black text-xs sm:text-sm md:text-base font-medium mb-1.5 block ml-1">
-          {t("title")}
-        </label>
-        <div className="relative">
-          <span className="absolute left-3 sm:left-4 md:left-5 top-1/2 -translate-y-1/2 opacity-60">
-            <Image
-              src="/event-title-icon.png"
-              alt="icon"
-              width={16}
-              height={16}
-            />
-          </span>
-          <input
-            type="text"
-            placeholder="Event title"
-            {...register("title")}
-            className="w-full h-11 sm:h-12 md:h-14 pl-10 sm:pl-11 md:pl-12 pr-4 rounded-lg bg-[#007DC514] border border-white/10 text-black text-sm sm:text-base md:text-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-          />
-          {errors.title && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">
-              {errors.title.message}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-        <div>
-          <label className="text-black text-xs sm:text-sm md:text-base font-medium mb-1.5 block ml-1">
-            {t("startDate")}
-          </label>
-          <input
-            type="date"
-            {...register("startDate")}
-            className="w-full h-11 sm:h-12 md:h-14 px-4 rounded-lg bg-[#007DC514] border border-white/10 text-black text-sm sm:text-base md:text-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-          {errors.startDate && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">
-              {errors.startDate.message}
-            </p>
-          )}
-        </div>
-        <div>
-          <label className="text-black text-xs sm:text-sm md:text-base font-medium mb-1.5 block ml-1">
-            {t("endDate")}
-          </label>
-          <input
-            type="date"
-            {...register("endDate")}
-            className="w-full h-11 sm:h-12 md:h-14 px-4 rounded-lg bg-[#007DC514] border border-white/10 text-black text-sm sm:text-base md:text-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-          {errors.endDate && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">
-              {errors.endDate.message}
-            </p>
-          )}
-        </div>
-      </div>
-      <div>
-        <label className="text-black text-xs sm:text-sm md:text-base font-medium mb-1.5 block ml-1">
-          {t("venue")}
-        </label>
-        <div className="relative">
-          <span className="absolute left-3 sm:left-4 md:left-5 top-1/2 -translate-y-1/2 opacity-60">
-            <Image src="/location-icon.png" alt="icon" width={16} height={16} />
-          </span>
-          <input
-            type="text"
-            placeholder={t("venuePlaceholder")}
-            {...register("venue")}
-            className="w-full h-11 sm:h-12 md:h-14 pl-10 sm:pl-11 md:pl-12 pr-4 rounded-lg bg-[#007DC514] border border-white/10 text-black text-sm sm:text-base md:text-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-          />
-          {errors.venue && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">
-              {errors.venue.message}
-            </p>
-          )}
-        </div>
-      </div>
-      <div>
-        <label className="text-black text-xs sm:text-sm md:text-base font-medium mb-1.5 block ml-1">
-          {t("expectedAttendees")}
-        </label>
-        <div className="relative">
-          <span className="absolute left-3 sm:left-4 md:left-5 top-1/2 -translate-y-1/2 opacity-60">
-            <Image src="/attandee-icon.png" alt="icon" width={16} height={16} />
-          </span>
-          <input
-            type="number"
-            placeholder="0"
-            {...register("expectedAttendees", { valueAsNumber: true })}
-            className="w-full h-11 sm:h-12 md:h-14 pl-10 sm:pl-11 md:pl-12 pr-4 rounded-lg bg-[#007DC514] border border-white/10 text-black text-sm sm:text-base md:text-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-          />
-          {errors.expectedAttendees && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">
-              {errors.expectedAttendees.message}
-            </p>
-          )}
-        </div>
-      </div>
-      <div>
-        <label className="text-black text-xs sm:text-sm md:text-base font-medium mb-1.5 block ml-1">
-          {t("description")}
-        </label>
-        <textarea
-          rows={4}
-          placeholder={t("descriptionPlaceholder")}
-          {...register("description")}
-          className="w-full p-3 sm:p-4 md:p-5 rounded-lg bg-[#007DC514] border border-white/10 text-black text-sm sm:text-base md:text-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-        />
-        {errors.description && (
-          <p className="text-red-500 text-xs sm:text-sm mt-1">
-            {errors.description.message}
-          </p>
-        )}
-      </div>
-      <div>
-        <label className="text-black text-xs sm:text-sm md:text-base font-medium mb-2 block ml-1">
-          {t("supportingDocuments")}
-        </label>
-        <div className="group relative border-2 border-dashed border-blue-500/50 bg-[#007DC514] hover:border-blue-500/50 rounded-xl p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center cursor-pointer gap-2 transition-all">
-          <input
-            type="file"
-            className="absolute inset-0 opacity-0 cursor-pointer"
-            multiple
-          />
-          <div className="w-14 h-8 sm:w-16 sm:h-10 md:w-20 md:h-12 overflow-visible scale-x-150">
-            <svg
-              className="w-full h-full text-blue-400 transition-transform group-hover:scale-110"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-              />
-            </svg>
-          </div>
-          <p className="text-black text-sm sm:text-base text-center">
-            {t("dragOrBrowse")}
-            <span className="text-blue-400 font-semibold" />
-          </p>
-          <p className="text-black text-[10px] sm:text-xs text-center">
-            {t("maxFileSize")}
-          </p>
-        </div>
-      </div>
-      <Button className="w-full h-12 sm:h-14 md:h-16 mt-4 bg-gradient-to-r from-[#1298E5] to-[#1298E5] hover:from-blue-500 hover:to-blue-600 active:scale-[0.99] transition-all rounded-lg text-white font-bold text-sm sm:text-base md:text-lg uppercase tracking-wider shadow-lg shadow-blue-500/20">
-        {t("submitButton")}
-      </Button>
-      {/* <button
-        type="submit"
-        className="w-full h-12 sm:h-14 md:h-16 mt-4 bg-gradient-to-r from-[#1298E5] to-[#1298E5] hover:from-blue-500 hover:to-blue-600 active:scale-[0.99] transition-all rounded-lg text-white font-bold text-sm sm:text-base md:text-lg uppercase tracking-wider shadow-lg shadow-blue-500/20"
+    <div className="flex flex-col h-full">
+      <form
+        className="space-y-2.5 sm:space-y-3 flex-1 overflow-y-auto pb-3 "
+        onSubmit={handleSubmit(onSubmit)}
+        id="registration-form"
       >
-        Register
-      </button> */}
-    </form>
+        <div className="m-3">
+          <div>
+            <label className="text-gray-800 text-xs sm:text-sm font-semibold mb-1 block">
+              {t("companyName")}
+            </label>
+            <div className="relative">
+              <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </span>
+              <input
+                type="text"
+                placeholder={t("companyNamePlaceholder")}
+                {...register("companyName")}
+                className="w-full h-9 sm:h-10 pl-8 sm:pl-9 pr-3 rounded-md bg-[#007DC514] border border-gray-200 text-gray-900 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400"
+              />
+              {errors.companyName && (
+                <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">
+                  {errors.companyName.message}
+                </p>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className="text-gray-800 text-xs sm:text-sm font-semibold mb-1 block">
+              {t("title")}
+            </label>
+            <div className="relative">
+              <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </span>
+              <input
+                type="text"
+                placeholder={t("titlePlaceholder")}
+                {...register("title")}
+                className="w-full h-9 sm:h-10 pl-8 sm:pl-9 pr-3 rounded-md bg-[#007DC514] border border-gray-200 text-gray-900 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400"
+              />
+              {errors.title && (
+                <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">
+                  {errors.title.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div>
+              <label className="text-gray-800 text-xs sm:text-sm font-semibold mb-1 block">
+                {t("startDate")}
+              </label>
+              <div className="relative">
+                <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                  <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </span>
+                <input
+                  type="date"
+                  {...register("startDate")}
+                  className="w-full h-9 sm:h-10 pl-8 sm:pl-9 pr-2.5 sm:pr-3 rounded-md bg-[#007DC514] border border-gray-200 text-gray-900 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none placeholder:text-gray-400"
+                />
+              </div>
+              {errors.startDate && (
+                <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">
+                  {errors.startDate.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="text-gray-800 text-xs sm:text-sm font-semibold mb-1 block">
+                {t("endDate")}
+              </label>
+              <div className="relative">
+                <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                  <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </span>
+                <input
+                  type="date"
+                  {...register("endDate")}
+                  className="w-full h-9 sm:h-10 pl-8 sm:pl-9 pr-2.5 sm:pr-3 rounded-md bg-[#007DC514] border border-gray-200 text-gray-900 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none placeholder:text-gray-400"
+                />
+              </div>
+              {errors.endDate && (
+                <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">
+                  {errors.endDate.message}
+                </p>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className="text-gray-800 text-xs sm:text-sm font-semibold mb-1 block">
+              {t("venue")}
+            </label>
+            <div className="relative">
+              <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </span>
+              <input
+                type="text"
+                placeholder={t("venuePlaceholder")}
+                {...register("venue")}
+                className="w-full h-9 sm:h-10 pl-8 sm:pl-9 pr-3 rounded-md bg-[#007DC514] border border-gray-200 text-gray-900 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400"
+              />
+              {errors.venue && (
+                <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">
+                  {errors.venue.message}
+                </p>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className="text-gray-800 text-xs sm:text-sm font-semibold mb-1 block">
+              {t("expectedAttendees")}
+            </label>
+            <div className="relative">
+              <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </span>
+              <input
+                type="number"
+                placeholder={t("expectedAttendeesPlaceholder")}
+                {...register("expectedAttendees", { valueAsNumber: true })}
+                className="w-full h-9 sm:h-10 pl-8 sm:pl-9 pr-3 rounded-md bg-[#007DC514] border border-gray-200 text-gray-900 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400"
+              />
+              {errors.expectedAttendees && (
+                <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">
+                  {errors.expectedAttendees.message}
+                </p>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className="text-gray-800 text-xs sm:text-sm font-semibold mb-1 block">
+              {t("email")}
+            </label>
+            <div className="relative">
+              <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </span>
+              <input
+                type="email"
+                placeholder={t("emailPlaceholder")}
+                {...register("email")}
+                className="w-full h-9 sm:h-10 pl-8 sm:pl-9 pr-3 rounded-md bg-[#007DC514] border border-gray-200 text-gray-900 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400"
+              />
+              {errors.email && (
+                <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className="text-gray-800 text-xs sm:text-sm font-semibold mb-1 block">
+              {t("phoneNumber")}
+            </label>
+            <div className="relative">
+              <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </span>
+              <input
+                type="tel"
+                placeholder={t("phoneNumberPlaceholder")}
+                {...register("phoneNumber")}
+                className="w-full h-9 sm:h-10 pl-8 sm:pl-9 pr-3 rounded-md bg-[#007DC514] border border-gray-200 text-gray-900 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400"
+              />
+              {errors.phoneNumber && (
+                <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">
+                  {errors.phoneNumber.message}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-gray-800 text-xs sm:text-sm">
+            <span className="font-semibold">{t("registrationType")}</span>
+            <label className="inline-flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="radio"
+                value="registration"
+                {...register("registrationType")}
+                className="accent-blue-500 w-3.5 h-3.5"
+              />
+              <span>{t("registrationTypeRegistration")}</span>
+            </label>
+            <label className="inline-flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="radio"
+                value="management"
+                {...register("registrationType")}
+                className="accent-blue-500 w-3.5 h-3.5"
+              />
+              <span>{t("registrationTypeManagement")}</span>
+            </label>
+          </div>
+          {errors.registrationType && (
+            <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">
+              {errors.registrationType.message}
+            </p>
+          )}
+          <div>
+            <label className="text-gray-800 text-xs sm:text-sm font-semibold mb-1 block">
+              {t("description")}
+            </label>
+            <textarea
+              rows={2}
+              placeholder={t("descriptionPlaceholder")}
+              {...register("description")}
+              className="w-full p-2.5 sm:p-3 rounded-md bg-[#007DC514] border border-gray-200 text-gray-900 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none placeholder:text-gray-400"
+            />
+            {errors.description && (
+              <p className="text-red-500 text-[10px] sm:text-xs mt-0.5">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="text-gray-800 text-xs sm:text-sm font-semibold mb-1 block">
+              {t("supportingDocuments")}
+            </label>
+            <div className="group relative border-2 border-dashed border-blue-400/50 bg-[#007DC514] hover:border-blue-500 rounded-lg p-3 sm:p-4 flex flex-col items-center justify-center cursor-pointer gap-1.5 transition-all">
+              <input
+                type="file"
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                multiple
+                aria-label="Upload supporting documents"
+              />
+              <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400 transition-transform group-hover:scale-110" />
+              <p className="text-gray-600 text-xs sm:text-sm text-center">
+                {t("dragOrBrowse")}
+              </p>
+              <p className="text-gray-400 text-[10px] sm:text-xs text-center">
+                {t("maxFileSize")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </form>
+      <div className="sticky bottom-0 bg-white pt-2.5 sm:pt-3 pb-1 border-t border-gray-100">
+        <Button
+          type="submit"
+          form="registration-form"
+          className="w-full h-10 sm:h-11 bg-[#1298E5] hover:bg-blue-600 active:scale-[0.99] transition-all rounded-md text-white font-semibold text-xs sm:text-sm uppercase tracking-wide"
+        >
+          {t("submitButton")}
+        </Button>
+      </div>
+    </div>
   );
 }
