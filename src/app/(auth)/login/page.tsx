@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-import logo from "../../../../public/qt-global-logo.png";
+import logo from "../../../../public/logo.png";
 
 import LoginForm from "@/components/forms/LoginForm";
 
