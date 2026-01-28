@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { useState, useEffect, useCallback } from "react";
 
-import RegisterModal from "../RegisterModel";
+import RegisterModal from "../ui/Modal/RegistrationModel";
 
 import { HeroBadge, Stat, TranslateFn } from "@/lib/constants/landing";
 export type HeroSectionProps = {

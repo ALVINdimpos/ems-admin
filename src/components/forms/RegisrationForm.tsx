@@ -12,7 +12,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
-import Button from "../ui/Button";
+import {Button} from "../ui/Button";
 
 import { RegisterFormData } from "@/lib/validators/authSchema";
 import { registerSchema } from "@/lib/validators/authSchema";

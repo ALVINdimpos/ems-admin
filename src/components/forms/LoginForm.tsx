@@ -1,15 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-import emailIcon from "../../../public/email-icon.png";
-
-import passwordIcon from "../../../public/password-icon.png";
-
 import { LoginFormData } from "@/lib/validators/authSchema";
 import { loginSchema } from "@/lib/validators/authSchema";
+import { EyeIcon, EyeOffIcon, LockIcon, MailIcon } from "lucide-react";
 
 export default function LoginForm() {
   const [canShowPassword, setCanShowPassword] = useState(false);
@@ -36,7 +32,7 @@ export default function LoginForm() {
         </label>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-80">
-            <Image src={emailIcon} alt="email" width={16} height={16} />
+          <MailIcon width={16} height={16} className="text-white/40" />
           </span>
           <input
             type="text"
@@ -55,7 +51,7 @@ export default function LoginForm() {
         </label>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-80">
-            <Image src={passwordIcon} alt="password" width={16} height={16} />
+            <LockIcon width={16} height={16} className="text-white/40" />
           </span>
           <input
             type={canShowPassword ? "text" : "password"}
@@ -67,7 +63,7 @@ export default function LoginForm() {
             className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 cursor-pointer hover:text-white"
             onClick={() => setCanShowPassword(!canShowPassword)}
           >
-            👁
+            {canShowPassword ? <EyeIcon width={16} height={16} className="text-white/40" /> : <EyeOffIcon width={16} height={16} className="text-white/40" />}
           </span>
           {errors.password && (
             <p className="text-red-500 text-xs mt-1">

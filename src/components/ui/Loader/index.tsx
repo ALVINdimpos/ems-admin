@@ -1,5 +1,4 @@
 import { Loader as LoaderIcon } from "lucide-react";
-import React from "react";
 
 interface ILoaderProps {
   size?: "sm" | "md" | "lg";
