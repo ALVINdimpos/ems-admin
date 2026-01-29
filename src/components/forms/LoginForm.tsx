@@ -1,15 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { EyeIcon, EyeOffIcon, LockIcon, MailIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { LoginFormData } from "@/lib/validators/authSchema";
 import { loginSchema } from "@/lib/validators/authSchema";
-import { EyeIcon, EyeOffIcon, LockIcon, MailIcon } from "lucide-react";
 
 export default function LoginForm() {
   const [canShowPassword, setCanShowPassword] = useState(false);
   const t = useTranslations("auth.login");
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -23,6 +25,7 @@ export default function LoginForm() {
   });
   const onSubmit = (data: LoginFormData) => {
     console.log("Form submitted:", data);
+    router.push("/dashboard/cms");
   };
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -32,7 +35,7 @@ export default function LoginForm() {
         </label>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-80">
-          <MailIcon width={16} height={16} className="text-white/40" />
+            <MailIcon width={16} height={16} className="text-white/40" />
           </span>
           <input
             type="text"
@@ -63,7 +66,11 @@ export default function LoginForm() {
             className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 cursor-pointer hover:text-white"
             onClick={() => setCanShowPassword(!canShowPassword)}
           >
-            {canShowPassword ? <EyeIcon width={16} height={16} className="text-white/40" /> : <EyeOffIcon width={16} height={16} className="text-white/40" />}
+            {canShowPassword ? (
+              <EyeIcon width={16} height={16} className="text-white/40" />
+            ) : (
+              <EyeOffIcon width={16} height={16} className="text-white/40" />
+            )}
           </span>
           {errors.password && (
             <p className="text-red-500 text-xs mt-1">

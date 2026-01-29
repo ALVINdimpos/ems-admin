@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import {
   DownloadIcon,
   Eye,
@@ -13,6 +11,9 @@ import {
   UserPlus2,
   SearchIcon,
 } from "lucide-react";
+import { useState } from "react";
+
+import { DataTable } from "@/components/table";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +21,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { DataTable } from "@/components/table";
 import { cn } from "@/lib/utils";
 
 type Gender = "MALE" | "FEMALE" | "OTHER";
@@ -233,8 +233,6 @@ function formatCell(value: unknown) {
 export default function UsersPage() {
   return (
     <div className="space-y-4">
-
-
       {/* Table toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white px-6 py-4 shadow-[0_14px_30px_rgba(15,23,42,0.08)]">
         {/* Search */}
@@ -298,7 +296,7 @@ export default function UsersPage() {
             ),
           },
           ...ALL_USER_FIELDS.filter(
-            (f) => !["first_name", "last_name"].includes(f.id as string),
+            (f) => !["first_name", "last_name"].includes(f.id as string)
           ).map((f) => ({
             id: f.id as string,
             label: f.label,
@@ -309,7 +307,7 @@ export default function UsersPage() {
                   <span
                     className={cn(
                       "inline-flex items-center gap-2 rounded-full px-4 py-1 text-[11px] font-semibold uppercase tracking-wide text-white",
-                      isActive ? "bg-[#22c55e]" : "bg-red-500",
+                      isActive ? "bg-[#22c55e]" : "bg-red-500"
                     )}
                   >
                     {isActive ? "Active" : "Inactive"}
@@ -318,7 +316,9 @@ export default function UsersPage() {
               }
 
               const value = (user as any)[f.id];
-              return <span className="text-slate-700">{formatCell(value)}</span>;
+              return (
+                <span className="text-slate-700">{formatCell(value)}</span>
+              );
             },
           })),
           {
@@ -326,9 +326,7 @@ export default function UsersPage() {
             label: "Actions",
             headerClassName: "text-right",
             cellClassName: "text-right",
-            render: (user) => (
-              <RowActions user={user} />
-            ),
+            render: (user) => <RowActions user={user} />,
           },
         ]}
       />
@@ -337,10 +335,10 @@ export default function UsersPage() {
 }
 
 function ExportMenu() {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const toggle = () => setOpen((prev) => !prev);
-  const close = () => setOpen(false);
+  const toggle = () => setIsOpen((prev) => !prev);
+  const close = () => setIsOpen(false);
 
   return (
     <div className="relative">
@@ -378,7 +376,15 @@ function ExportMenu() {
     </div>
   );
 }
-function MenuButton({ children, className = "", onClick }: { children: React.ReactNode; className?: string; onClick: () => void }) {
+function MenuButton({
+  children,
+  className = "",
+  onClick,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  onClick: () => void;
+}) {
   return (
     <button
       onClick={onClick}
@@ -387,9 +393,8 @@ function MenuButton({ children, className = "", onClick }: { children: React.Rea
     >
       {children}
     </button>
-  )
+  );
 }
-
 
 function PermissionsDialog({
   open,
@@ -463,10 +468,10 @@ function PermissionChip({ label }: { label: string }) {
 }
 
 function RowActions({ user }: { user: User }) {
-  const [open, setOpen] = useState(false);
-  const [permissionsOpen, setPermissionsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
 
-  const closeMenu = () => setOpen(false);
+  const closeMenu = () => setIsOpen(false);
 
   return (
     <div className="relative flex items-center justify-end gap-3 text-slate-500">
@@ -475,7 +480,7 @@ function RowActions({ user }: { user: User }) {
       </button>
 
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setIsOpen((v) => !v)}
         className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100"
       >
         <MoreVertical width={16} height={16} />
@@ -491,7 +496,7 @@ function RowActions({ user }: { user: User }) {
           <MenuButton
             onClick={() => {
               closeMenu();
-              setPermissionsOpen(true);
+              setIsPermissionsOpen(true);
             }}
           >
             <Shield className="h-3.5 w-3.5 text-blue-600" />
@@ -521,5 +526,4 @@ function RowActions({ user }: { user: User }) {
     </div>
   );
 }
-
 

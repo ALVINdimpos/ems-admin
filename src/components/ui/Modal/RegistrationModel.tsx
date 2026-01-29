@@ -1,6 +1,6 @@
 "use client";
 
-import RegistrationForm from "@/components/forms/RegisrationForm";
+import RegistrationForm from "@/components/forms/RegistrationForm";
 import Modal from "@/components/ui/Modal";
 
 type Props = {

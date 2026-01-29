@@ -1,20 +1,58 @@
-import { BellIcon, SearchIcon } from "lucide-react";
+"use client";
 
-  export default function Header() {
+import { BellIcon, SearchIcon, ChevronRight } from "lucide-react";
+import { usePathname } from "next/navigation";
+
+function generateBreadcrumbs(
+  pathname: string
+): { label: string; path?: string }[] {
+  const segments = pathname.split("/").filter(Boolean);
+  const breadcrumbs: { label: string; path?: string }[] = [{ label: "🏡" }];
+
+  let currentPath = "";
+  for (const segment of segments) {
+    currentPath += `/${segment}`;
+    const label = segment
+      .split("-")
+      .map((word) => word.charAt(0).toLocaleUpperCase() + word.slice(1))
+      .join(" ");
+    breadcrumbs.push({ label, path: currentPath });
+  }
+
+  return breadcrumbs;
+}
+
+export default function Header() {
+  const pathname = usePathname();
+  const breadcrumbs = generateBreadcrumbs(pathname);
+
   return (
     <header className="flex h-20 items-center justify-between border-b border-slate-200 bg-white px-8">
-      {/* Page title */}
-      <div>
-        <h1 className="text-sm font-semibold tracking-[0.18em] text-slate-500">
-          Users
-        </h1>
+      {/* Breadcrumb navigation */}
+      <div className="flex items-center gap-2">
+        {breadcrumbs.map((crumb, index) => (
+          <div key={crumb.path || "home"} className="flex items-center gap-2">
+            <span
+              className={`text-sm ${
+                index === breadcrumbs.length - 1
+                  ? "font-semibold text-slate-700"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {crumb.label}
+            </span>
+            {index < breadcrumbs.length - 1 && (
+              <ChevronRight className="h-4 w-4 text-slate-400" />
+            )}
+          </div>
+        ))}
       </div>
 
       {/* Right actions */}
       <div className="flex items-center gap-6">
         {/* Search */}
         <div className="relative w-[360px]">
-          <input        
+          <input
             type="text"
             placeholder="Search for something"
             className="h-11 w-full rounded-full border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 shadow-[0_8px_20px_rgba(15,23,42,0.05)] focus:border-[#0f6ca6] focus:bg-white focus:outline-none"

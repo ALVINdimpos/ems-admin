@@ -23,7 +23,7 @@ type Column<T> = {
   cellClassName?: string;
 };
 
-interface DataTableProps<T> {
+interface IDataTableProps<T> {
   data: T[];
   columns: Column<T>[];
   getRowKey?: (row: T, index: number) => React.Key;
@@ -39,23 +39,23 @@ export function DataTable<T>({
   className,
   containerClassName,
   tableClassName,
-}: DataTableProps<T>) {
+}: IDataTableProps<T>) {
   return (
     <div
       className={cn(
         "rounded-2xl border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)]",
         "w-full overflow-hidden",
-        className,
+        className
       )}
     >
       <UiTable
         containerClassName={cn(
           "max-h-[70vh] w-full overflow-x-auto",
-          containerClassName,
+          containerClassName
         )}
         className={cn(
           "w-full border-separate border-spacing-0",
-          tableClassName,
+          tableClassName
         )}
       >
         <TableHeader className="sticky top-0 z-10">
@@ -65,7 +65,7 @@ export function DataTable<T>({
                 key={column.id}
                 className={cn(
                   "h-12 whitespace-nowrap px-4 text-left text-[13px] font-semibold tracking-wide text-white first:rounded-tl-2xl last:rounded-tr-2xl",
-                  column.headerClassName,
+                  column.headerClassName
                 )}
               >
                 {column.label}
@@ -80,7 +80,7 @@ export function DataTable<T>({
               className={cn(
                 "bg-white text-[13px] text-slate-700",
                 "even:bg-[#f7f9fc]",
-                "hover:bg-[#eef3ff]",
+                "hover:bg-[#eef3ff]"
               )}
             >
               {columns.map((column) => (
@@ -88,7 +88,7 @@ export function DataTable<T>({
                   key={column.id}
                   className={cn(
                     "whitespace-nowrap px-4 py-3 align-middle last:pr-5",
-                    column.cellClassName,
+                    column.cellClassName
                   )}
                 >
                   {column.render ? column.render(row) : (row as any)[column.id]}
@@ -101,3 +101,5 @@ export function DataTable<T>({
     </div>
   );
 }
+
+
