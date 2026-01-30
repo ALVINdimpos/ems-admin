@@ -761,6 +761,7 @@ export default function CategoriesPage() {
         }}
         title={editingCategory ? "Edit Category" : "Create Category"}
         size="md"
+        backdropClassName="bg-black/60 backdrop-blur-sm"
       >
         <CategoryForm
           category={editingCategory}
@@ -786,6 +787,7 @@ export default function CategoriesPage() {
         title=""
         size="sm"
         showCloseButton={false}
+        backdropClassName="bg-black/60 backdrop-blur-sm"
       >
         {deletingCategory && (
           <DeleteDialog

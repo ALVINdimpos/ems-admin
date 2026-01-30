@@ -249,7 +249,8 @@ export default function ContentDetailsPage() {
                 <Image
                   src={content.featuredImage}
                   alt={content.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
             </div>
@@ -286,12 +287,13 @@ export default function ContentDetailsPage() {
                 {content.mediaUrls.map((url, index) => (
                   <div
                     key={index}
-                    className="aspect-square bg-gray-100 rounded-lg overflow-hidden"
+                    className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative"
                   >
                     <Image
                       src={url}
                       alt={`Media ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   </div>
                 ))}

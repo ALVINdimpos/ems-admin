@@ -1,7 +1,11 @@
-"use client";
+import { Metadata } from "next";
 
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
+
+export const metadata: Metadata = {
+  title: "Dashboard - EMS",
+};
 
 export default function DashboardLayout({
   children,

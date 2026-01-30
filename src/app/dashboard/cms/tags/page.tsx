@@ -652,6 +652,7 @@ export default function TagsPage() {
         }}
         title={editingTag ? "Edit Tag" : "Create Tag"}
         size="md"
+        backdropClassName="bg-black/60 backdrop-blur-sm"
       >
         <TagForm
           tag={editingTag}
@@ -677,6 +678,7 @@ export default function TagsPage() {
         title=""
         size="sm"
         showCloseButton={false}
+        backdropClassName="bg-black/60 backdrop-blur-sm"
       >
         {deletingTag && (
           <DeleteDialog

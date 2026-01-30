@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { AboutSection } from "@/components/landing/AboutSection";
+import { AnnouncementSection } from "@/components/landing/Announcement";
 import { ContactSection } from "@/components/landing/ContactSection";
 import { EventsSection } from "@/components/landing/EventsSection";
 import { FaqSection } from "@/components/landing/FAQSection";
@@ -33,6 +34,8 @@ export default function HomePage() {
       <FeaturesSection tLanding={tLanding} features={features} />
 
       <EventsSection />
+
+      <AnnouncementSection />
 
       <SolutionsSection tLanding={tLanding} solutions={solutions} />
 

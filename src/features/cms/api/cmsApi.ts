@@ -17,15 +17,17 @@ import type {
   ICreateContentTag,
   IUpdateContentTag,
   IBulkActionRequest,
-  ICMSStats,
+  ICmsStats,
   IQueryParams,
 } from "../types";
 
 import {
   mockStats,
-  mockContents,
   mockCategories,
   mockTags,
+  contentStore,
+  generateSlug,
+  generateId,
 } from "../utils/mockData";
 
 import apiClient from "@/lib/api/client";
@@ -96,33 +98,111 @@ export const contentApi = {
     params?: IQueryParams
   ): Promise<IApiResponse<IMarketingContent[]>> => {
     const query = buildQueryString(filters as Record<string, unknown>, params);
-    return withMockFallback(
-      () => apiClient.get<IMarketingContent[]>(`${CMS_BASE}/content${query}`),
-      mockContents
-    );
+    try {
+      const response = await apiClient.get<IMarketingContent[]>(
+        `${CMS_BASE}/content${query}`
+      );
+      if (response.success && response.data) {
+        return response;
+      }
+    } catch {
+      // Fallback to in-memory store
+    }
+
+    // Use in-memory store with filtering
+    let results = contentStore.getAll();
+
+    if (filters) {
+      if (filters.type) {
+        results = results.filter((c) => c.type === filters.type);
+      }
+      if (filters.status) {
+        results = results.filter((c) => c.status === filters.status);
+      }
+      if (filters.isActive !== undefined) {
+        results = results.filter((c) => c.isActive === filters.isActive);
+      }
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        results = results.filter(
+          (c) =>
+            c.title.toLowerCase().includes(searchLower) ||
+            c.summary?.toLowerCase().includes(searchLower)
+        );
+      }
+    }
+
+    // Apply sorting
+    if (params?.sort) {
+      const { field, order } = params.sort;
+      results.sort((a, b) => {
+        const aVal = (a as unknown as Record<string, unknown>)[field];
+        const bVal = (b as unknown as Record<string, unknown>)[field];
+        if (
+          aVal === undefined ||
+          aVal === null ||
+          bVal === undefined ||
+          bVal === null
+        )
+          return 0;
+        if (order === "desc") {
+          return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+        }
+        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+      });
+    }
+
+    // Apply pagination
+    if (params?.limit) {
+      const start = ((params.page || 1) - 1) * params.limit;
+      results = results.slice(start, start + params.limit);
+    }
+
+    return { success: true, data: results };
   },
 
   /**
    * Get single content by ID
    */
   getById: async (id: string): Promise<IApiResponse<IMarketingContent>> => {
-    return withMockFallback(
-      () => apiClient.get<IMarketingContent>(`${CMS_BASE}/content/${id}`),
-      mockContents[0] || ({} as IMarketingContent)
-    );
+    try {
+      const response = await apiClient.get<IMarketingContent>(
+        `${CMS_BASE}/content/${id}`
+      );
+      if (response.success && response.data) {
+        return response;
+      }
+    } catch {
+      // Fallback to in-memory store
+    }
+
+    const content = contentStore.getById(id);
+    if (content) {
+      return { success: true, data: content };
+    }
+    return { success: false, error: "Content not found" };
   },
 
   /**
    * Get content by slug
    */
   getBySlug: async (slug: string): Promise<IApiResponse<IMarketingContent>> => {
-    return withMockFallback(
-      () =>
-        apiClient.get<IMarketingContent>(`${CMS_BASE}/content/slug/${slug}`),
-      mockContents.find((c) => c.slug === slug) ||
-        mockContents[0] ||
-        ({} as IMarketingContent)
-    );
+    try {
+      const response = await apiClient.get<IMarketingContent>(
+        `${CMS_BASE}/content/slug/${slug}`
+      );
+      if (response.success && response.data) {
+        return response;
+      }
+    } catch {
+      // Fallback to in-memory store
+    }
+
+    const content = contentStore.filter((c) => c.slug === slug)[0];
+    if (content) {
+      return { success: true, data: content };
+    }
+    return { success: false, error: "Content not found" };
   },
 
   /**
@@ -131,7 +211,34 @@ export const contentApi = {
   create: async (
     data: ICreateMarketingContent
   ): Promise<IApiResponse<IMarketingContent>> => {
-    return apiClient.post<IMarketingContent>(`${CMS_BASE}/content`, data);
+    try {
+      const response = await apiClient.post<IMarketingContent>(
+        `${CMS_BASE}/content`,
+        data
+      );
+      if (response.success && response.data) {
+        return response;
+      }
+    } catch {
+      // Fallback to in-memory store
+    }
+
+    // Create in memory
+    const slug = generateSlug(data.title);
+    const newContent = contentStore.create({
+      ...data,
+      slug,
+      priority: data.priority ?? 0,
+      isActive: data.isActive ?? true,
+      viewCount: 0,
+      status: data.status || "DRAFT",
+      publishedAt:
+        data.status === "PUBLISHED" ? new Date().toISOString() : undefined,
+      author: { id: "user-1", name: "Current User", email: "user@example.com" },
+      authorId: "user-1",
+    } as Omit<IMarketingContent, "id" | "createdAt" | "updatedAt">);
+
+    return { success: true, data: newContent };
   },
 
   /**
@@ -141,17 +248,43 @@ export const contentApi = {
     id: string,
     data: Partial<IUpdateMarketingContent>
   ): Promise<IApiResponse<IMarketingContent>> => {
-    return apiClient.patch<IMarketingContent>(
-      `${CMS_BASE}/content/${id}`,
-      data
-    );
+    try {
+      const response = await apiClient.patch<IMarketingContent>(
+        `${CMS_BASE}/content/${id}`,
+        data
+      );
+      if (response.success && response.data) {
+        return response;
+      }
+    } catch {
+      // Fallback to in-memory store
+    }
+
+    const updated = contentStore.update(id, data as Partial<IMarketingContent>);
+    if (updated) {
+      return { success: true, data: updated };
+    }
+    return { success: false, error: "Content not found" };
   },
 
   /**
    * Delete content
    */
   delete: async (id: string): Promise<IApiResponse<void>> => {
-    return apiClient.delete(`${CMS_BASE}/content/${id}`);
+    try {
+      const response = await apiClient.delete(`${CMS_BASE}/content/${id}`);
+      if (response.success) {
+        return response;
+      }
+    } catch {
+      // Fallback to in-memory store
+    }
+
+    const isDeleted = contentStore.delete(id);
+    if (isDeleted) {
+      return { success: true, data: undefined };
+    }
+    return { success: false, error: "Content not found" };
   },
 
   /**
@@ -160,34 +293,118 @@ export const contentApi = {
   bulkAction: async (
     request: IBulkActionRequest
   ): Promise<IApiResponse<{ affected: number }>> => {
-    return apiClient.post(`${CMS_BASE}/content/bulk`, request);
+    try {
+      const response = await apiClient.post(
+        `${CMS_BASE}/content/bulk`,
+        request
+      );
+      if (response.success) {
+        return response;
+      }
+    } catch {
+      // Fallback to in-memory store
+    }
+
+    let affected = 0;
+    for (const id of request.ids) {
+      if (request.action === "delete") {
+        if (contentStore.delete(id)) affected++;
+      } else if (request.action === "publish") {
+        const updated = contentStore.update(id, {
+          status: "PUBLISHED",
+          publishedAt: new Date().toISOString(),
+        } as Partial<IMarketingContent>);
+        if (updated) affected++;
+      } else if (request.action === "archive") {
+        const updated = contentStore.update(id, {
+          status: "ARCHIVED",
+        } as Partial<IMarketingContent>);
+        if (updated) affected++;
+      }
+    }
+
+    return { success: true, data: { affected } };
   },
 
   /**
    * Publish content
    */
   publish: async (id: string): Promise<IApiResponse<IMarketingContent>> => {
-    return apiClient.patch<IMarketingContent>(
-      `${CMS_BASE}/content/${id}/publish`
-    );
+    try {
+      const response = await apiClient.patch<IMarketingContent>(
+        `${CMS_BASE}/content/${id}/publish`
+      );
+      if (response.success && response.data) {
+        return response;
+      }
+    } catch {
+      // Fallback to in-memory store
+    }
+
+    const updated = contentStore.update(id, {
+      status: "PUBLISHED",
+      publishedAt: new Date().toISOString(),
+    } as Partial<IMarketingContent>);
+    if (updated) {
+      return { success: true, data: updated };
+    }
+    return { success: false, error: "Content not found" };
   },
 
   /**
    * Archive content
    */
   archive: async (id: string): Promise<IApiResponse<IMarketingContent>> => {
-    return apiClient.patch<IMarketingContent>(
-      `${CMS_BASE}/content/${id}/archive`
-    );
+    try {
+      const response = await apiClient.patch<IMarketingContent>(
+        `${CMS_BASE}/content/${id}/archive`
+      );
+      if (response.success && response.data) {
+        return response;
+      }
+    } catch {
+      // Fallback to in-memory store
+    }
+
+    const updated = contentStore.update(id, {
+      status: "ARCHIVED",
+    } as Partial<IMarketingContent>);
+    if (updated) {
+      return { success: true, data: updated };
+    }
+    return { success: false, error: "Content not found" };
   },
 
   /**
    * Duplicate content
    */
   duplicate: async (id: string): Promise<IApiResponse<IMarketingContent>> => {
-    return apiClient.post<IMarketingContent>(
-      `${CMS_BASE}/content/${id}/duplicate`
-    );
+    try {
+      const response = await apiClient.post<IMarketingContent>(
+        `${CMS_BASE}/content/${id}/duplicate`
+      );
+      if (response.success && response.data) {
+        return response;
+      }
+    } catch {
+      // Fallback to in-memory store
+    }
+
+    const original = contentStore.getById(id);
+    if (!original) {
+      return { success: false, error: "Content not found" };
+    }
+
+    const duplicated = contentStore.create({
+      ...original,
+      title: `${original.title} (Copy)`,
+      slug: `${original.slug}-copy-${generateId().slice(0, 8)}`,
+      status: "DRAFT",
+      publishedAt: undefined,
+      viewCount: 0,
+    } as Omit<IMarketingContent, "id" | "createdAt" | "updatedAt">);
+
+    return { success: true, data: duplicated };
   },
 };
 
@@ -358,10 +575,10 @@ export const statsApi = {
   /**
    * Get CMS dashboard statistics
    */
-  getDashboardStats: async (): Promise<IApiResponse<ICMSStats>> => {
+  getDashboardStats: async (): Promise<IApiResponse<ICmsStats>> => {
     // Use mock data for development/testing when API is not available
     try {
-      const response = await apiClient.get<ICMSStats>(
+      const response = await apiClient.get<ICmsStats>(
         `${CMS_BASE}/stats/dashboard`
       );
       if (response.success && response.data) {

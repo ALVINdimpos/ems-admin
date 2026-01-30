@@ -663,3 +663,53 @@ export function useCmsStats(): IUseStatsReturn {
     refresh: fetchStats,
   };
 }
+
+// ============================================================================
+// Announcements Hook (for Landing Page)
+// ============================================================================
+
+interface IUseAnnouncementsReturn {
+  announcements: IMarketingContent[];
+  isLoading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+}
+
+export function useAnnouncements(limit = 5): IUseAnnouncementsReturn {
+  const [announcements, setAnnouncements] = useState<IMarketingContent[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchAnnouncements = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await cmsApi.content.getAll(
+        { type: "ANNOUNCEMENT", status: "PUBLISHED", isActive: true },
+        { limit, sort: { field: "priority", order: "desc" } }
+      );
+
+      if (response.success && response.data) {
+        setAnnouncements(response.data);
+      } else {
+        setError(response.error || "Failed to fetch announcements");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [limit]);
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, [fetchAnnouncements]);
+
+  return {
+    announcements,
+    isLoading,
+    error,
+    refresh: fetchAnnouncements,
+  };
+}

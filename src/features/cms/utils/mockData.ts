@@ -7,7 +7,7 @@ import type {
   IMarketingContent,
   IContentCategory,
   IContentTag,
-  ICMSStats,
+  ICmsStats,
 } from "../types";
 
 // Generate a UUID-like ID
@@ -258,19 +258,89 @@ export const mockContents: IMarketingContent[] = [
     updatedAt: generateDate(5),
     publishedAt: generateDate(18),
   },
+  // Additional Announcement content for landing page
+  {
+    id: generateId(),
+    title: "Platform Maintenance Scheduled",
+    slug: "platform-maintenance-scheduled",
+    type: "ANNOUNCEMENT",
+    status: "PUBLISHED",
+    summary:
+      "Scheduled maintenance on February 15th, 2026 from 2:00 AM to 6:00 AM UTC. Some services may be temporarily unavailable.",
+    content:
+      "<h1>Scheduled Maintenance</h1><p>We will be performing scheduled maintenance to improve system performance.</p>",
+    featuredImage: "https://picsum.photos/seed/announce1/800/400",
+    priority: 85,
+    isActive: true,
+    viewCount: 450,
+    categoryId: mockCategories[3].id,
+    category: mockCategories[3],
+    tags: [mockTags[2]],
+    authorId: "user-1",
+    author: { id: "user-1", name: "John Doe", email: "john@example.com" },
+    createdAt: generateDate(2),
+    updatedAt: generateDate(1),
+    publishedAt: generateDate(1),
+  },
+  {
+    id: generateId(),
+    title: "New Mobile App Now Available",
+    slug: "new-mobile-app-available",
+    type: "ANNOUNCEMENT",
+    status: "PUBLISHED",
+    summary:
+      "Download our brand new mobile app for iOS and Android. Manage your events on the go with seamless synchronization.",
+    content:
+      "<h1>Mobile App Launch</h1><p>Experience event management like never before with our new mobile app.</p>",
+    featuredImage: "https://picsum.photos/seed/announce2/800/400",
+    priority: 88,
+    isActive: true,
+    viewCount: 1200,
+    categoryId: mockCategories[1].id,
+    category: mockCategories[1],
+    tags: [mockTags[0], mockTags[1]],
+    authorId: "user-2",
+    author: { id: "user-2", name: "Jane Smith", email: "jane@example.com" },
+    createdAt: generateDate(5),
+    updatedAt: generateDate(2),
+    publishedAt: generateDate(4),
+  },
+  {
+    id: generateId(),
+    title: "Early Bird Registration Open",
+    slug: "early-bird-registration-open",
+    type: "ANNOUNCEMENT",
+    status: "PUBLISHED",
+    summary:
+      "Register now for the 2026 Annual Summit and save 30% with our early bird pricing. Limited spots available!",
+    content:
+      "<h1>Early Bird Special</h1><p>Don't miss out on exclusive early bird pricing for our biggest event of the year.</p>",
+    featuredImage: "https://picsum.photos/seed/announce3/800/400",
+    priority: 92,
+    isActive: true,
+    viewCount: 780,
+    categoryId: mockCategories[2].id,
+    category: mockCategories[2],
+    tags: [mockTags[0], mockTags[2]],
+    authorId: "user-1",
+    author: { id: "user-1", name: "John Doe", email: "john@example.com" },
+    createdAt: generateDate(3),
+    updatedAt: generateDate(1),
+    publishedAt: generateDate(2),
+  },
 ];
 
 // ============================================================================
 // Mock Stats
 // ============================================================================
 
-export const mockStats: ICMSStats = {
+export const mockStats: ICmsStats = {
   totalContent: mockContents.length,
   contentByType: {
     BANNER: 1,
     HERO: 1,
     PROMOTION: 0,
-    ANNOUNCEMENT: 1,
+    ANNOUNCEMENT: 4,
     BLOG: 0,
     TESTIMONIAL: 1,
     FAQ: 1,
