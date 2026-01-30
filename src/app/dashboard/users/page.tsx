@@ -351,7 +351,7 @@ function ExportMenu() {
         <span>Export</span>
         <span className="text-xs">▾</span>
       </button>
-      {open && (
+      {isOpen && (
         <div className="absolute right-0 z-20 mt-2 w-40 rounded-xl bg-white py-2 text-sm text-slate-700 shadow-[0_18px_40px_rgba(15,23,42,0.18)]">
           <button
             className="block w-full px-4 py-1.5 text-left hover:bg-slate-50"
@@ -486,7 +486,7 @@ function RowActions({ user }: { user: User }) {
         <MoreVertical width={16} height={16} />
       </button>
 
-      {open && (
+      {isOpen && (
         <div className="absolute right-0 top-8 z-30 w-40 rounded-xl bg-white text-xs shadow-lg ring-1 ring-slate-900/5">
           <MenuButton onClick={closeMenu}>
             <Pencil className="h-3.5 w-3.5 text-amber-500" />
@@ -519,11 +519,10 @@ function RowActions({ user }: { user: User }) {
 
       {/* Permissions Modal */}
       <PermissionsDialog
-        open={permissionsOpen}
-        onOpenChange={setPermissionsOpen}
+        open={isPermissionsOpen}
+        onOpenChange={setIsPermissionsOpen}
         user={user}
       />
     </div>
   );
 }
-

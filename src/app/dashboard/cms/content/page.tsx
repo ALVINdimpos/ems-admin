@@ -24,12 +24,7 @@ import {
   TagBadge,
   type IFilterField,
 } from "@/features/cms/components";
-import {
-  useContent,
-  useSelection,
-  useCategories,
-  useTags,
-} from "@/features/cms/hooks";
+import { useContent, useSelection, useCategories } from "@/features/cms/hooks";
 import type { BulkAction, IContentFilters } from "@/features/cms/types";
 
 // Content type options for filter
@@ -55,7 +50,7 @@ const STATUS_OPTIONS = [
 export default function ContentListPage() {
   const {
     contents,
-    loading: isLoading,
+    isLoading,
     error,
     pagination,
     filters,
@@ -69,7 +64,6 @@ export default function ContentListPage() {
   } = useContent();
 
   const { categories } = useCategories();
-
 
   const selection = useSelection(contents);
   const [searchValue, setSearchValue] = useState(filters.search || "");
@@ -193,10 +187,12 @@ export default function ContentListPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={refresh}
-            disabled={loading}
+            disabled={isLoading}
             className="inline-flex items-center gap-2 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
             Refresh
           </button>
           <Link
@@ -275,8 +271,8 @@ export default function ContentListPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {loading && contents.length === 0 ? (
-                // Loading skeleton
+              {isLoading && contents.length === 0 ? (
+                // isLoading skeleton
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
                     <td className="px-4 py-4">
@@ -331,8 +327,9 @@ export default function ContentListPage() {
                 contents.map((content) => (
                   <tr
                     key={content.id}
-                    className={`hover:bg-gray-50 ${selection.isSelected(content.id) ? "bg-blue-50" : ""
-                      }`}
+                    className={`hover:bg-gray-50 ${
+                      selection.isSelected(content.id) ? "bg-blue-50" : ""
+                    }`}
                   >
                     <td className="px-4 py-4">
                       <input
@@ -446,7 +443,7 @@ export default function ContentListPage() {
                               </button>
                             )}
                             <button
-                              onClick={() => { }}
+                              onClick={() => {}}
                               className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                             >
                               <Copy className="h-4 w-4" />
@@ -504,5 +501,3 @@ export default function ContentListPage() {
     </div>
   );
 }
-
-

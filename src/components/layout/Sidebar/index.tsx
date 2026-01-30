@@ -168,14 +168,16 @@ export default function Sidebar() {
       {/* Brand block matching reference */}
       <div className="px-8 pt-10 text-center">
         <div className="mb-10 flex justify-center">
-          <Image
-            src={logo}
-            alt="QT Global Software logo"
-            width={220}
-            height={80}
-            className="h-16 w-auto"
-            priority
-          />
+          <Link href={"/"}>
+            <Image
+              src={logo}
+              alt="QT Global Software logo"
+              width={220}
+              height={80}
+              className="h-16 w-auto"
+              priority
+            />
+          </Link>
         </div>
         <p className="text-sm font-semibold tracking-wide">
           Event Management System
@@ -203,4 +205,3 @@ export default function Sidebar() {
     </aside>
   );
 }
-

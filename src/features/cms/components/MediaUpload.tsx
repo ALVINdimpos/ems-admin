@@ -1,7 +1,8 @@
 "use client";
 
 import { Upload, X, Image as ImageIcon, Film, Loader2 } from "lucide-react";
-import React, { useCallback, useState, useRef } from "react";
+import Image from "next/image";
+import React, { useCallback, useMemo, useState, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -35,7 +36,10 @@ export default function MediaUpload({
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const urls = Array.isArray(value) ? value : value ? [value] : [];
+  const urls = useMemo(
+    () => (Array.isArray(value) ? value : value ? [value] : []),
+    [value]
+  );
 
   const validateFile = useCallback(
     (file: File): string | null => {
@@ -210,7 +214,7 @@ export default function MediaUpload({
               className="relative group aspect-video rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
             >
               {isImage(url) ? (
-                <img
+                <Image
                   src={url}
                   alt={`Upload ${index + 1}`}
                   className="w-full h-full object-cover"

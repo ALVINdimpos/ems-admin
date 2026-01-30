@@ -25,7 +25,6 @@ export const contentStatusSchema = z.enum([
   "SCHEDULED",
 ]);
 
-
 // Hex color pattern
 const hexColorPattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 
@@ -184,5 +183,3 @@ export type CreateContentFormData = z.infer<typeof createContentSchema>;
 export type UpdateContentFormData = z.infer<typeof updateContentSchema>;
 export type ContentFiltersFormData = z.infer<typeof contentFiltersSchema>;
 export type BulkActionFormData = z.infer<typeof bulkActionSchema>;
-
-

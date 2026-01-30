@@ -48,10 +48,10 @@ export default function EditContentPage() {
   const contentId = params.id as string;
 
   const [content, setContent] = useState<IMarketingContent | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { categories } = useCategories();
   const { tags } = useTags();
@@ -72,7 +72,7 @@ export default function EditContentPage() {
   // Fetch content to edit
   useEffect(() => {
     const fetchContent = async () => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         const response = await cmsApi.content.getById(contentId);
         if (response.success && response.data) {
@@ -95,7 +95,7 @@ export default function EditContentPage() {
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -122,7 +122,7 @@ export default function EditContentPage() {
 
   // Handle form submission
   const onSubmit = async (data: UpdateContentFormData) => {
-    setSubmitting(true);
+    setIsSubmitting(true);
     setError(null);
 
     try {
@@ -139,11 +139,11 @@ export default function EditContentPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -184,7 +184,9 @@ export default function EditContentPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Edit Content</h1>
-            <p className="text-gray-500 mt-1">Update &ldquo;{content.title}&rdquo;</p>
+            <p className="text-gray-500 mt-1">
+              Update &ldquo;{content.title}&rdquo;
+            </p>
           </div>
         </div>
       </div>
@@ -441,10 +443,10 @@ export default function EditContentPage() {
           </Link>
           <button
             type="submit"
-            disabled={submitting}
+            disabled={isSubmitting}
             className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            {submitting ? (
+            {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Saving...
@@ -461,4 +463,3 @@ export default function EditContentPage() {
     </div>
   );
 }
-

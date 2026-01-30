@@ -70,12 +70,14 @@ export default function NewContentPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
-  const { categories, loading: _isCategoriesLoading } = useCategories();
-  const { tags, loading: _isTagsLoading } = useTags();
+  const { categories, isLoading: isCategoriesLoading } = useCategories();
+  const { tags, isLoading: isTagsLoading } = useTags();
 
   const {
     register,
-    handleSubmit, control, watch,
+    handleSubmit,
+    control,
+    watch,
     formState: { errors },
   } = useForm<CreateContentFormData>({
     resolver: zodResolver(createContentSchema),
@@ -347,7 +349,7 @@ export default function NewContentPage() {
             <select
               {...register("categoryId")}
               className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={categoriesLoading}
+              disabled={isCategoriesLoading}
             >
               <option value="">Select a category</option>
               {categories.map((category) => (
@@ -364,7 +366,7 @@ export default function NewContentPage() {
               Tags
             </label>
             <div className="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg min-h-[60px]">
-              {tagsLoading ? (
+              {isTagsLoading ? (
                 <p className="text-sm text-gray-500">Loading tags...</p>
               ) : tags.length === 0 ? (
                 <p className="text-sm text-gray-500">
@@ -504,5 +506,3 @@ export default function NewContentPage() {
     </div>
   );
 }
-
-

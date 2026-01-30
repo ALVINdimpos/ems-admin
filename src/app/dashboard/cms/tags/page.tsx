@@ -11,7 +11,7 @@ import {
   X,
   Check,
 } from "lucide-react";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
@@ -125,18 +125,19 @@ function TagForm({
             value={slug}
             onChange={(e) => {
               setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"));
-              setSlugManuallyEdited(true);
+              setIsSlugManuallyEdited(true);
             }}
             placeholder="tag-slug"
             disabled={isSubmitting}
-            className={`flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.slug ? "border-red-500" : "border-gray-300"
-              } ${isSubmitting ? "bg-gray-100 cursor-not-allowed" : ""}`}
+            className={`flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.slug ? "border-red-500" : "border-gray-300"
+            } ${isSubmitting ? "bg-gray-100 cursor-not-allowed" : ""}`}
           />
           <button
             type="button"
             onClick={() => {
               setSlug(generateSlug(name));
-              setSlugManuallyEdited(false);
+              setIsSlugManuallyEdited(false);
             }}
             disabled={isSubmitting || !name}
             className="px-3 py-2 text-sm text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -279,10 +280,9 @@ function DeleteDialog({
 export default function TagsPage() {
   // State
   const [tags, setTags] = useState<IContentTag[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchValue, setSearchValue] = useState("");
-  const [isFilterActive, setIsFilterActive] = useState<boolean | null>(null);
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -290,6 +290,7 @@ export default function TagsPage() {
   const [editingTag, setEditingTag] = useState<IContentTag | null>(null);
   const [deletingTag, setDeletingTag] = useState<IContentTag | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFilterActive, setIsFilterActive] = useState<boolean | null>(null);
 
   // Toast/notification state
   const [notification, setNotification] = useState<{
@@ -319,7 +320,7 @@ export default function TagsPage() {
       tag.slug.toLowerCase().includes(searchValue.toLowerCase());
 
     const isMatchingActive =
-      isisFilterActive === null || tag.isActive === isFilterActive;
+      isFilterActive === null || tag.isActive === isFilterActive;
 
     return isMatchingSearch && isMatchingActive;
   });
@@ -427,10 +428,11 @@ export default function TagsPage() {
       {/* Notification Toast */}
       {notification && (
         <div
-          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${notification.type === "success"
-            ? "bg-green-100 text-green-800 border border-green-200"
-            : "bg-red-100 text-red-800 border border-red-200"
-            }`}
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
+            notification.type === "success"
+              ? "bg-green-100 text-green-800 border border-green-200"
+              : "bg-red-100 text-red-800 border border-red-200"
+          }`}
         >
           {notification.type === "success" ? (
             <Check className="h-4 w-4" />
@@ -458,10 +460,12 @@ export default function TagsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={loadTags}
-            disabled={loading}
+            disabled={isLoading}
             className="inline-flex items-center gap-2 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
             Refresh
           </button>
           <button
@@ -502,9 +506,9 @@ export default function TagsPage() {
 
         {/* Active Filter */}
         <select
-          value={isisFilterActive === null ? "" : filterActive.toString()}
+          value={isFilterActive === null ? "" : isFilterActive.toString()}
           onChange={(e) =>
-            setFilterActive(
+            setIsFilterActive(
               e.target.value === "" ? null : e.target.value === "true"
             )
           }
@@ -518,7 +522,7 @@ export default function TagsPage() {
 
       {/* Tags Grid */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        {loading ? (
+        {isLoading ? (
           // Loading skeleton
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -540,11 +544,11 @@ export default function TagsPage() {
             <Tags className="h-12 w-12 mx-auto mb-2 opacity-50" />
             <p className="text-lg font-medium">No tags found</p>
             <p className="text-sm mt-1">
-              {searchValue || filterActive !== null
+              {searchValue || isFilterActive !== null
                 ? "Try adjusting your search or filters"
                 : "Create your first tag to get started"}
             </p>
-            {!searchValue && isisFilterActive === null && (
+            {!searchValue && isFilterActive === null && (
               <button
                 onClick={() => {
                   setEditingTag(null);
@@ -630,7 +634,7 @@ export default function TagsPage() {
         )}
 
         {/* Summary Footer */}
-        {!loading && filteredTags.length > 0 && (
+        {!isLoading && filteredTags.length > 0 && (
           <div className="mt-6 pt-4 border-t border-gray-200 text-sm text-gray-500">
             Showing {filteredTags.length} of {tags.length} tags
           </div>
@@ -689,5 +693,3 @@ export default function TagsPage() {
     </div>
   );
 }
-
-

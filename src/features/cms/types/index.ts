@@ -209,4 +209,3 @@ export interface IPermissions {
   canArchive: boolean;
   canBulkAction: boolean;
 }
-

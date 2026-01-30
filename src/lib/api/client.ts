@@ -5,7 +5,7 @@
 
 import type { IApiResponse } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api/v1";
 
 interface IRequestOptions extends RequestInit {
   data?: any;
@@ -52,7 +52,10 @@ class ApiClient {
         data: result.data || result,
       };
     } catch (error) {
-      console.error("API request failed:", error);
+      console.log(
+        "API request failed:",
+        error instanceof Error ? error.message : error
+      );
       return {
         success: false,
         error:

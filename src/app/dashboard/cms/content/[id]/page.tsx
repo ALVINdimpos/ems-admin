@@ -17,6 +17,7 @@ import {
   Loader2,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
@@ -245,7 +246,7 @@ export default function ContentDetailsPage() {
           {content.featuredImage && (
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="aspect-video bg-gray-100 relative">
-                <img
+                <Image
                   src={content.featuredImage}
                   alt={content.title}
                   className="w-full h-full object-cover"
@@ -287,7 +288,7 @@ export default function ContentDetailsPage() {
                     key={index}
                     className="aspect-square bg-gray-100 rounded-lg overflow-hidden"
                   >
-                    <img
+                    <Image
                       src={url}
                       alt={`Media ${index + 1}`}
                       className="w-full h-full object-cover"
@@ -382,10 +383,10 @@ export default function ContentDetailsPage() {
               {content.status !== "PUBLISHED" && (
                 <button
                   onClick={handlePublish}
-                  disabled={actionLoading}
+                  disabled={isActionLoading}
                   className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                 >
-                  {actionLoading ? (
+                  {isActionLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <CheckCircle className="h-4 w-4" />
@@ -397,10 +398,10 @@ export default function ContentDetailsPage() {
               {content.status !== "ARCHIVED" && (
                 <button
                   onClick={handleArchive}
-                  disabled={actionLoading}
+                  disabled={isActionLoading}
                   className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
                 >
-                  {actionLoading ? (
+                  {isActionLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <Archive className="h-4 w-4" />
@@ -414,10 +415,10 @@ export default function ContentDetailsPage() {
             <div className="space-y-2 pt-4 border-t border-gray-200">
               <button
                 onClick={handleDuplicate}
-                disabled={actionLoading}
+                disabled={isActionLoading}
                 className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
-                {actionLoading ? (
+                {isActionLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Copy className="h-4 w-4" />
@@ -571,15 +572,15 @@ export default function ContentDetailsPage() {
       </div>
 
       {/* Delete Confirmation Dialog */}
-      {showDeleteConfirm && (
+      {isDeleteConfirmOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Delete Content?
             </h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete &ldquo;{content.title}&rdquo;? This action
-              cannot be undone.
+              Are you sure you want to delete &ldquo;{content.title}&rdquo;?
+              This action cannot be undone.
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -602,4 +603,3 @@ export default function ContentDetailsPage() {
     </div>
   );
 }
-

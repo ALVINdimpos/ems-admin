@@ -5,5 +5,5 @@ export type enMessages = typeof en;
 export type frMessages = typeof fr;
 
 declare global {
-  interface INextIntlMessages extends enMessages, frMessages {}
+  // interface INextIntlMessages extends enMessages, frMessages {}
 }

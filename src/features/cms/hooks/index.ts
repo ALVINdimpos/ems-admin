@@ -12,8 +12,8 @@ import type {
   ITagFilters,
   IQueryParams,
   ISortOptions,
-  ICMSStats,
   BulkAction,
+  ICmsStats,
 } from "../types";
 
 // ============================================================================
@@ -178,7 +178,7 @@ export function useSelection<T extends { id: string }>(
 
 interface IUseContentReturn {
   contents: IMarketingContent[];
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
   pagination: IPaginationState;
   filters: IContentFilters;
@@ -368,7 +368,7 @@ export function useContent(): IUseContentReturn {
 
   return {
     contents,
-    loading: isLoading,
+    isLoading: isLoading,
     error,
     pagination,
     filters,
@@ -393,7 +393,7 @@ export function useContent(): IUseContentReturn {
 
 interface IUseCategoriesReturn {
   categories: IContentCategory[];
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
   create: (data: Partial<IContentCategory>) => Promise<IContentCategory | null>;
@@ -497,7 +497,7 @@ export function useCategories(
 
   return {
     categories,
-    loading: isLoading,
+    isLoading: isLoading,
     error,
     refresh: fetchCategories,
     create,
@@ -512,7 +512,7 @@ export function useCategories(
 
 interface IUseTagsReturn {
   tags: IContentTag[];
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
   create: (data: Partial<IContentTag>) => Promise<IContentTag | null>;
@@ -609,7 +609,7 @@ export function useTags(filters?: ITagFilters): IUseTagsReturn {
 
   return {
     tags,
-    loading: isLoading,
+    isLoading: isLoading,
     error,
     refresh: fetchTags,
     create,
@@ -623,14 +623,14 @@ export function useTags(filters?: ITagFilters): IUseTagsReturn {
 // ============================================================================
 
 interface IUseStatsReturn {
-  stats: ICMSStats | null;
-  loading: boolean;
+  stats: ICmsStats | null;
+  isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
 }
 
 export function useCmsStats(): IUseStatsReturn {
-  const [stats, setStats] = useState<ICMSStats | null>(null);
+  const [stats, setStats] = useState<ICmsStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -658,11 +658,8 @@ export function useCmsStats(): IUseStatsReturn {
 
   return {
     stats,
-    loading: isLoading,
+    isLoading,
     error,
     refresh: fetchStats,
   };
 }
-
-
-

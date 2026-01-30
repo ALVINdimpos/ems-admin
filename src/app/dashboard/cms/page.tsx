@@ -12,11 +12,12 @@ import {
   Send,
   FileEdit,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
 import { StatCard, StatusBadge, TypeBadge } from "@/features/cms/components";
-import { useCMSStats } from "@/features/cms/hooks";
+import { useCmsStats } from "@/features/cms/hooks";
 import type { ContentType, ContentStatus } from "@/features/cms/types";
 
 // Quick action card component
@@ -55,7 +56,7 @@ function ContentTypeChart({ data, loading }: IDistributionChartProps) {
   const total = Object.values(data).reduce((sum, count) => sum + count, 0);
   const types = Object.entries(data) as [ContentType, number][];
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="space-y-3">
         {[1, 2, 3, 4].map((i) => (
@@ -115,7 +116,7 @@ function StatusChart({ data, loading }: IStatusChartProps) {
   const statuses = Object.entries(data) as [ContentStatus, number][];
   const total = Object.values(data).reduce((sum, count) => sum + count, 0);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center gap-4">
         {[1, 2, 3, 4].map((i) => (
@@ -148,7 +149,7 @@ function StatusChart({ data, loading }: IStatusChartProps) {
 }
 
 export default function CmsPage() {
-  const { stats, loading, error } = useCMSStats();
+  const { stats, isLoading, error } = useCmsStats();
 
   // Default stats for loading/empty state
   const defaultStats = {
@@ -205,7 +206,7 @@ export default function CmsPage() {
           icon={FileText}
           iconColor="text-blue-600"
           iconBgColor="bg-blue-100"
-          loading={loading}
+          loading={isLoading}
         />
         <StatCard
           title="Published"
@@ -213,7 +214,7 @@ export default function CmsPage() {
           icon={Send}
           iconColor="text-green-600"
           iconBgColor="bg-green-100"
-          loading={loading}
+          loading={isLoading}
         />
         <StatCard
           title="Categories"
@@ -221,7 +222,7 @@ export default function CmsPage() {
           icon={FolderTree}
           iconColor="text-purple-600"
           iconBgColor="bg-purple-100"
-          loading={loading}
+          loading={isLoading}
         />
         <StatCard
           title="Tags"
@@ -229,7 +230,7 @@ export default function CmsPage() {
           icon={Tags}
           iconColor="text-orange-600"
           iconBgColor="bg-orange-100"
-          loading={loading}
+          loading={isLoading}
         />
       </div>
 
@@ -243,7 +244,7 @@ export default function CmsPage() {
           </h2>
           <ContentTypeChart
             data={displayStats.contentByType}
-            loading={loading}
+            loading={isLoading}
           />
         </div>
 
@@ -253,7 +254,10 @@ export default function CmsPage() {
             <TrendingUp className="h-5 w-5 text-gray-400" />
             Content by Status
           </h2>
-          <StatusChart data={displayStats.contentByStatus} loading={loading} />
+          <StatusChart
+            data={displayStats.contentByStatus}
+            loading={isLoading}
+          />
         </div>
       </div>
 
@@ -300,7 +304,7 @@ export default function CmsPage() {
           </Link>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div
@@ -335,10 +339,12 @@ export default function CmsPage() {
                 className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 {content.featuredImage ? (
-                  <img
+                  <Image
                     src={content.featuredImage}
-                    alt=""
-                    className="h-10 w-10 rounded object-cover"
+                    alt={content.title}
+                    width={40}
+                    height={40}
+                    className="rounded object-cover"
                   />
                 ) : (
                   <div className="h-10 w-10 bg-gray-200 rounded flex items-center justify-center">
@@ -365,4 +371,3 @@ export default function CmsPage() {
     </div>
   );
 }
-
