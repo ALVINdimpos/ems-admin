@@ -89,6 +89,14 @@ function buildQueryString(
 // Marketing Content API
 // ============================================================================
 
+export interface IPaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export const contentApi = {
   /**
    * Get paginated list of marketing content with filters
@@ -96,12 +104,12 @@ export const contentApi = {
   getAll: async (
     filters?: IContentFilters,
     params?: IQueryParams
-  ): Promise<IApiResponse<IMarketingContent[]>> => {
+  ): Promise<IApiResponse<IPaginatedResponse<IMarketingContent>>> => {
     const query = buildQueryString(filters as Record<string, unknown>, params);
     try {
-      const response = await apiClient.get<IMarketingContent[]>(
-        `${CMS_BASE}/content${query}`
-      );
+      const response = await apiClient.get<
+        IPaginatedResponse<IMarketingContent>
+      >(`${CMS_BASE}/content${query}`);
       if (response.success && response.data) {
         return response;
       }
@@ -130,6 +138,9 @@ export const contentApi = {
             c.summary?.toLowerCase().includes(searchLower)
         );
       }
+      if (filters.categoryId) {
+        results = results.filter((c) => c.categoryId === filters.categoryId);
+      }
     }
 
     // Apply sorting
@@ -152,13 +163,26 @@ export const contentApi = {
       });
     }
 
-    // Apply pagination
-    if (params?.limit) {
-      const start = ((params.page || 1) - 1) * params.limit;
-      results = results.slice(start, start + params.limit);
-    }
+    // Get total before pagination
+    const total = results.length;
+    const limit = params?.limit || 10;
+    const page = params?.page || 1;
+    const totalPages = Math.ceil(total / limit);
 
-    return { success: true, data: results };
+    // Apply pagination
+    const start = (page - 1) * limit;
+    const paginatedResults = results.slice(start, start + limit);
+
+    return {
+      success: true,
+      data: {
+        data: paginatedResults,
+        total,
+        page,
+        limit,
+        totalPages,
+      },
+    };
   },
 
   /**

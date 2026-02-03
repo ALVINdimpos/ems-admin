@@ -4,9 +4,9 @@ import { useTranslations } from "next-intl";
 
 import { AboutSection } from "@/components/landing/AboutSection";
 import { AnnouncementSection } from "@/components/landing/Announcement";
+import { CmsFaqSection } from "@/components/landing/CMSFaqSection";
 import { ContactSection } from "@/components/landing/ContactSection";
 import { EventsSection } from "@/components/landing/EventsSection";
-import { FaqSection } from "@/components/landing/FAQSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
@@ -43,7 +43,7 @@ export default function HomePage() {
 
       <AboutSection tLanding={tLanding} />
 
-      <FaqSection tLanding={tLanding} />
+      <CmsFaqSection />
 
       <ContactSection tLanding={tLanding} />
 

@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | EMS - Event Management System",
-    default: "EMS | Event Management System",
+    template: "%s | Event Management System",
+    default: "EMS - Event Management System",
   },
   description: "Event Management System",
   metadataBase: new URL("https://www.qtglobal.rw/"),

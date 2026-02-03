@@ -36,7 +36,7 @@ export default function AnnouncementDetailsPage() {
           });
 
           if (allContent.success && allContent.data) {
-            const found = allContent.data.find(
+            const found = allContent.data.data.find(
               (c) =>
                 c.slug === slug ||
                 c.slug === decodedSlug ||

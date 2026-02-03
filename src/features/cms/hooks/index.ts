@@ -31,6 +31,7 @@ interface IUsePaginationReturn {
   pagination: IPaginationState;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
+  setTotal: (total: number) => void;
   nextPage: () => void;
   prevPage: () => void;
   resetPagination: () => void;
@@ -50,6 +51,14 @@ export function usePagination(initialLimit = 10): IUsePaginationReturn {
 
   const setLimit = useCallback((limit: number) => {
     setPagination((prev) => ({ ...prev, limit, page: 1 }));
+  }, []);
+
+  const setTotal = useCallback((total: number) => {
+    setPagination((prev) => ({
+      ...prev,
+      total,
+      totalPages: Math.ceil(total / prev.limit),
+    }));
   }, []);
 
   const nextPage = useCallback(() => {
@@ -74,6 +83,7 @@ export function usePagination(initialLimit = 10): IUsePaginationReturn {
     pagination,
     setPage,
     setLimit,
+    setTotal,
     nextPage,
     prevPage,
     resetPagination,
@@ -208,7 +218,8 @@ export function useContent(): IUseContentReturn {
   const [filters, setFilters] = useState<IContentFilters>({});
   const [sort, setSort] = useState<ISortOptions | undefined>();
 
-  const { pagination, setPage, setLimit, resetPagination } = usePagination(10);
+  const { pagination, setPage, setLimit, setTotal, resetPagination } =
+    usePagination(10);
 
   const fetchContents = useCallback(async () => {
     setIsLoading(true);
@@ -222,7 +233,8 @@ export function useContent(): IUseContentReturn {
     try {
       const response = await cmsApi.content.getAll(filters, params);
       if (response.success && response.data) {
-        setContents(response.data);
+        setContents(response.data.data);
+        setTotal(response.data.total);
       } else {
         setError(response.error || "Failed to fetch content");
       }
@@ -231,7 +243,7 @@ export function useContent(): IUseContentReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [filters, sort, pagination.page, pagination.limit]);
+  }, [filters, sort, pagination.page, pagination.limit, setTotal]);
 
   useEffect(() => {
     fetchContents();
@@ -691,7 +703,7 @@ export function useAnnouncements(limit = 5): IUseAnnouncementsReturn {
       );
 
       if (response.success && response.data) {
-        setAnnouncements(response.data);
+        setAnnouncements(response.data.data);
       } else {
         setError(response.error || "Failed to fetch announcements");
       }
@@ -711,5 +723,69 @@ export function useAnnouncements(limit = 5): IUseAnnouncementsReturn {
     isLoading,
     error,
     refresh: fetchAnnouncements,
+  };
+}
+
+// ============================================================================
+// FAQ Hook (for Landing Page)
+// ============================================================================
+
+interface IFaqItem {
+  id: string;
+  question: string;
+  answer: string;
+  priority: number;
+}
+
+interface IUseFaqReturn {
+  faqs: IFaqItem[];
+  isLoading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+}
+
+export function useFaq(limit = 10): IUseFaqReturn {
+  const [faqs, setFaqs] = useState<IFaqItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchFaqs = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await cmsApi.content.getAll(
+        { type: "FAQ", status: "PUBLISHED", isActive: true },
+        { limit, sort: { field: "priority", order: "desc" } }
+      );
+
+      if (response.success && response.data) {
+        // Transform CMS content to FAQ format
+        const faqItems: IFaqItem[] = response.data.data.map((content) => ({
+          id: content.id,
+          question: content.title,
+          answer: content.content,
+          priority: content.priority,
+        }));
+        setFaqs(faqItems);
+      } else {
+        setError(response.error || "Failed to fetch FAQs");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [limit]);
+
+  useEffect(() => {
+    fetchFaqs();
+  }, [fetchFaqs]);
+
+  return {
+    faqs,
+    isLoading,
+    error,
+    refresh: fetchFaqs,
   };
 }

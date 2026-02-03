@@ -13,6 +13,7 @@ import {
   ChevronRight,
   RefreshCw,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useCallback } from "react";
 
@@ -342,9 +343,9 @@ export default function ContentListPage() {
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
                         {content.featuredImage ? (
-                          <img
+                          <Image
                             src={content.featuredImage}
-                            alt=""
+                            alt={content.title}
                             className="h-10 w-10 rounded object-cover"
                           />
                         ) : (

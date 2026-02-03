@@ -43,10 +43,12 @@ export default function LoginForm() {
             {...register("email")}
             className="w-full h-[40px] pl-11 pr-4 rounded-lg bg-white/10 border border-white/20 text-white text-sm placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
-          {errors.email && (
-            <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
-          )}
         </div>
+        {errors.email && (
+          <p className="text-red-500 text-xs mt-1 ml-1">
+            {errors.email.message}
+          </p>
+        )}
       </div>
       <div>
         <label className="text-white text-xs mb-1.5 block ml-1">
@@ -72,12 +74,12 @@ export default function LoginForm() {
               <EyeOffIcon width={16} height={16} className="text-white/40" />
             )}
           </span>
-          {errors.password && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.password.message}
-            </p>
-          )}
         </div>
+        {errors.password && (
+          <p className="text-red-500 text-xs mt-1 ml-1">
+            {errors.password.message}
+          </p>
+        )}
       </div>
       <div className="flex items-center justify-between text-xs py-1">
         <label className="flex items-center gap-2 text-white/70 cursor-pointer">

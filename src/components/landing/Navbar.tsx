@@ -64,7 +64,7 @@ export function Navbar({ tLanding, tCommon }: NavbarProps) {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 flex w-full h-[70px] md:h-[100px] mx-auto items-center justify-between gap-4 px-4 sm:px-6 md:px-8 transition-all duration-300 ${
+        className={`sticky top-0 z-50 flex w-full h-[70px] md:h-[100px] mx-auto items-center justify-between gap-4 px-6 sm:px-8 md:px-12 lg:px-16 transition-all duration-300 ${
           isScrolled
             ? "bg-[#0A1628]/95 backdrop-blur-md shadow-lg"
             : "bg-transparent"
@@ -92,7 +92,7 @@ export function Navbar({ tLanding, tCommon }: NavbarProps) {
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-sm lg:text-base font-semibold text-white hover:text-white/80 transition"
+                className="relative text-sm lg:text-base font-semibold text-white hover:text-white/80 transition after:content-[''] after:absolute after:left-0 after:right-0 after:-bottom-1 after:h-[2px] after:bg-[#1298E5] after:scale-x-0 hover:after:scale-x-100 after:transition-all after:duration-300"
               >
                 {link.label}
               </Link>
@@ -151,7 +151,7 @@ export function Navbar({ tLanding, tCommon }: NavbarProps) {
               key={link.label}
               href={link.href}
               onClick={handleLinkClick}
-              className="text-lg font-semibold text-white hover:text-white/80 hover:bg-white/5 px-4 py-3 rounded-lg transition"
+              className="relative text-lg font-semibold text-white hover:text-white/80 hover:bg-white/5 px-4 py-3 rounded-lg transition after:content-[''] after:absolute after:left-4 after:right-4 after:bottom-2 after:h-[2px] after:bg-[#1298E5] after:scale-x-0 hover:after:scale-x-100 after:transition-all after:duration-300"
             >
               {link.label}
             </Link>
