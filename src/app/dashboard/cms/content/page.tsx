@@ -1,28 +1,19 @@
 "use client";
 
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  MoreVertical,
-  Send,
-  Archive,
-  Copy,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import React, { useState, useCallback } from "react";
+
+import {
+  ContentHeader,
+  ContentTableSkeleton,
+  ContentEmptyState,
+  ContentTableRow,
+  ContentPagination,
+  ErrorAlert,
+} from "./_components";
 
 import {
   SearchFilter,
   BulkActions,
-  StatusBadge,
-  TypeBadge,
-  TagBadge,
   type IFilterField,
 } from "@/features/cms/components";
 import { useContent, useSelection, useCategories } from "@/features/cms/hooks";
@@ -109,7 +100,6 @@ export default function ContentListPage() {
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchValue(value);
-      // Debounce would be ideal here, using a simple approach
       const timeoutId = setTimeout(() => {
         setFilters({ ...filters, search: value || undefined });
       }, 300);
@@ -121,7 +111,7 @@ export default function ContentListPage() {
   // Handle filter changes
   const handleFilterChange = useCallback(
     (key: string, value: unknown) => {
-      const validValue = value as any;
+      const validValue = value as unknown;
       setFilters({ ...filters, [key]: validValue } as IContentFilters);
     },
     [filters, setFilters]
@@ -173,46 +163,18 @@ export default function ContentListPage() {
     [archive]
   );
 
+  // Toggle action menu
+  const handleMenuToggle = useCallback((contentId: string) => {
+    setActionMenuOpen((prev) => (prev === contentId ? null : contentId));
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Marketing Content
-          </h1>
-          <p className="text-gray-500 mt-1">
-            Manage all your marketing content in one place
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={refresh}
-            disabled={isLoading}
-            className="inline-flex items-center gap-2 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </button>
-          <Link
-            href="/dashboard/cms/content/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            <Plus className="h-4 w-4" />
-            Create Content
-          </Link>
-        </div>
-      </div>
+      <ContentHeader onRefresh={refresh} isLoading={isLoading} />
 
       {/* Error Alert */}
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          <p className="font-medium">Error</p>
-          <p className="text-sm mt-1">{error}</p>
-        </div>
-      )}
+      {error && <ErrorAlert error={error} />}
 
       {/* Search and Filters */}
       <SearchFilter
@@ -273,196 +235,22 @@ export default function ContentListPage() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoading && contents.length === 0 ? (
-                // isLoading skeleton
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td className="px-4 py-4">
-                      <div className="h-4 w-4 bg-gray-200 rounded" />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-gray-200 rounded" />
-                        <div className="h-4 w-32 bg-gray-200 rounded" />
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="h-5 w-16 bg-gray-200 rounded-full" />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="h-5 w-16 bg-gray-200 rounded-full" />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="h-4 w-20 bg-gray-200 rounded" />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="h-5 w-12 bg-gray-200 rounded-full" />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="h-4 w-24 bg-gray-200 rounded" />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="h-8 w-8 bg-gray-200 rounded ml-auto" />
-                    </td>
-                  </tr>
-                ))
+                <ContentTableSkeleton />
               ) : contents.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={8}
-                    className="px-4 py-12 text-center text-gray-500"
-                  >
-                    <p className="text-lg font-medium">No content found</p>
-                    <p className="text-sm mt-1">
-                      Try adjusting your filters or create new content
-                    </p>
-                    <Link
-                      href="/dashboard/cms/content/new"
-                      className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Create Content
-                    </Link>
-                  </td>
-                </tr>
+                <ContentEmptyState />
               ) : (
                 contents.map((content) => (
-                  <tr
+                  <ContentTableRow
                     key={content.id}
-                    className={`hover:bg-gray-50 ${
-                      selection.isSelected(content.id) ? "bg-blue-50" : ""
-                    }`}
-                  >
-                    <td className="px-4 py-4">
-                      <input
-                        type="checkbox"
-                        checked={selection.isSelected(content.id)}
-                        onChange={() => selection.toggle(content.id)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        {content.featuredImage ? (
-                          <Image
-                            src={content.featuredImage}
-                            alt={content.title}
-                            className="h-10 w-10 rounded object-cover"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">
-                            No img
-                          </div>
-                        )}
-                        <div>
-                          <Link
-                            href={`/dashboard/cms/content/${content.id}`}
-                            className="font-medium text-gray-900 hover:text-blue-600"
-                          >
-                            {content.title}
-                          </Link>
-                          {content.summary && (
-                            <p className="text-sm text-gray-500 truncate max-w-xs">
-                              {content.summary}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <TypeBadge type={content.type} />
-                    </td>
-                    <td className="px-4 py-4">
-                      <StatusBadge status={content.status} />
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-600">
-                      {content.category?.name || "-"}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex flex-wrap gap-1 max-w-[150px]">
-                        {content.tags?.slice(0, 2).map((tag) => (
-                          <TagBadge
-                            key={tag.id}
-                            name={tag.name}
-                            color={tag.color}
-                          />
-                        ))}
-                        {content.tags && content.tags.length > 2 && (
-                          <span className="text-xs text-gray-500">
-                            +{content.tags.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-500">
-                      {new Date(content.updatedAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="relative flex justify-end">
-                        <button
-                          onClick={() =>
-                            setActionMenuOpen(
-                              actionMenuOpen === content.id ? null : content.id
-                            )
-                          }
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                          <MoreVertical className="h-4 w-4 text-gray-500" />
-                        </button>
-
-                        {actionMenuOpen === content.id && (
-                          <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                            <Link
-                              href={`/dashboard/cms/content/${content.id}`}
-                              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              <Eye className="h-4 w-4" />
-                              View
-                            </Link>
-                            <Link
-                              href={`/dashboard/cms/content/${content.id}/edit`}
-                              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              <Edit className="h-4 w-4" />
-                              Edit
-                            </Link>
-                            {content.status === "DRAFT" && (
-                              <button
-                                onClick={() => handlePublish(content.id)}
-                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              >
-                                <Send className="h-4 w-4" />
-                                Publish
-                              </button>
-                            )}
-                            {content.status === "PUBLISHED" && (
-                              <button
-                                onClick={() => handleArchive(content.id)}
-                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              >
-                                <Archive className="h-4 w-4" />
-                                Archive
-                              </button>
-                            )}
-                            <button
-                              onClick={() => {}}
-                              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              <Copy className="h-4 w-4" />
-                              Duplicate
-                            </button>
-                            <hr className="my-1 border-gray-200" />
-                            <button
-                              onClick={() => handleDelete(content.id)}
-                              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                    content={content}
+                    isSelected={selection.isSelected(content.id)}
+                    isMenuOpen={actionMenuOpen === content.id}
+                    onSelect={() => selection.toggle(content.id)}
+                    onMenuToggle={() => handleMenuToggle(content.id)}
+                    onPublish={handlePublish}
+                    onArchive={handleArchive}
+                    onDelete={handleDelete}
+                  />
                 ))
               )}
             </tbody>
@@ -470,34 +258,13 @@ export default function ContentListPage() {
         </div>
 
         {/* Pagination */}
-        {pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
-            <div className="text-sm text-gray-500">
-              Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-              {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
-              of {pagination.total} results
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setPage(pagination.page - 1)}
-                disabled={pagination.page === 1}
-                className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <span className="text-sm text-gray-700">
-                Page {pagination.page} of {pagination.totalPages}
-              </span>
-              <button
-                onClick={() => setPage(pagination.page + 1)}
-                disabled={pagination.page === pagination.totalPages}
-                className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
+        <ContentPagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          limit={pagination.limit}
+          total={pagination.total}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   );

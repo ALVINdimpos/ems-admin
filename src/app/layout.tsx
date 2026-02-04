@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { ToastProvider } from "@/context/ToastContext";
 import { LocaleProvider } from "@/providers/LocaleProvider";
 import "@/styles/globals.css";
 
@@ -33,7 +34,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <LocaleProvider>{children}</LocaleProvider>
+        <LocaleProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

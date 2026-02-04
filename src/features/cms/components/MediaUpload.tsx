@@ -217,7 +217,9 @@ export default function MediaUpload({
                 <Image
                   src={url}
                   alt={`Upload ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  unoptimized={url.startsWith("blob:")}
                 />
               ) : isVideo(url) ? (
                 <div className="w-full h-full flex items-center justify-center">
