@@ -124,3 +124,8 @@
     @apply bg-background text-foreground;
   }
 }
+/* Text selection styling for inputs */
+input::selection {
+  background-color: rgb(59, 130, 246);
+  color: white;
+}
