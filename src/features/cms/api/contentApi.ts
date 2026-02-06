@@ -45,12 +45,19 @@ function normalizeContent(raw: Record<string, unknown>): IMarketingContent {
 
   // Flatten junction-table tags if needed
   const rawTags = (raw.tags ?? []) as (IRawTagJunction | IContentTag)[];
-  const tags: IContentTag[] = rawTags.map((t) => {
-    if ("tag" in t && t.tag && typeof t.tag === "object") {
-      return t.tag as IContentTag;
-    }
-    return t as IContentTag;
-  });
+  const tags: IContentTag[] = rawTags
+    .map((t) => {
+      if ("tag" in t && t.tag && typeof t.tag === "object") {
+        return t.tag as IContentTag;
+      }
+      // If the item already has an `id`, treat it as a plain tag
+      if ("id" in t && (t as IContentTag).id) {
+        return t as IContentTag;
+      }
+      // Skip malformed entries (junction rows without nested tag)
+      return null;
+    })
+    .filter((t): t is IContentTag => t !== null);
 
   return { ...(raw as unknown as IMarketingContent), status, tags };
 }

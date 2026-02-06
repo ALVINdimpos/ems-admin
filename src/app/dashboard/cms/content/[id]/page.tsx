@@ -467,8 +467,12 @@ export default function ContentDetailsPage() {
                   <span>Tags</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {content.tags.map((tag) => (
-                    <TagBadge key={tag.id} name={tag.name} color={tag.color} />
+                  {content.tags.map((tag, idx) => (
+                    <TagBadge
+                      key={tag.id ?? `tag-${idx}`}
+                      name={tag.name}
+                      color={tag.color}
+                    />
                   ))}
                 </div>
               </div>
