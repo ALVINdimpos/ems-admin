@@ -57,7 +57,69 @@ function normalizeContent(raw: Record<string, unknown>): IMarketingContent {
 
 export const contentApi = {
   /**
-   * Get paginated list of marketing content with filters
+   * Get published content (public / unprotected endpoint).
+   *
+   * Hits `/marketing-contents/published` which requires no auth.
+   * Accepts optional filters (e.g. type) and pagination params.
+   */
+  getPublished: async (
+    filters?: IContentFilters,
+    params?: IQueryParams
+  ): Promise<IApiResponse<IPaginatedResponse<IMarketingContent>>> => {
+    const query = buildQueryString(filters as Record<string, unknown>, params);
+    const response = await apiClient.get<Record<string, unknown>[]>(
+      `/marketing-contents/published${query}`
+    );
+
+    if (!response.success) {
+      return { success: false, error: response.error };
+    }
+
+    const rawItems = Array.isArray(response.data) ? response.data : [];
+    const items = rawItems.map(normalizeContent);
+    const total =
+      response.total ?? (response.meta?.total as number) ?? items.length;
+    const page = (response.meta?.page as number) ?? params?.page ?? 1;
+    const limit = (response.meta?.limit as number) ?? params?.limit ?? 10;
+    const totalPages =
+      (response.meta?.totalPages as number) ?? Math.ceil(total / limit);
+
+    return {
+      success: true,
+      data: { data: items, total, page, limit, totalPages },
+    };
+  },
+
+  /**
+   * Get a single published content item by ID (public / unprotected).
+   *
+   * Hits `/marketing-contents/published` with an id filter, no auth needed.
+   */
+  getPublishedById: async (
+    id: string
+  ): Promise<IApiResponse<IMarketingContent>> => {
+    const response = await apiClient.get<Record<string, unknown>[]>(
+      `/marketing-contents/published?id=${encodeURIComponent(id)}`
+    );
+
+    if (!response.success) {
+      return { success: false, error: response.error };
+    }
+
+    const rawItems = Array.isArray(response.data) ? response.data : [];
+    const found = rawItems.find(
+      (item) => (item as Record<string, unknown>).id === id
+    );
+
+    if (!found) {
+      return { success: false, error: "Content not found" };
+    }
+
+    return { success: true, data: normalizeContent(found) };
+  },
+
+  /**
+   * Get paginated list of marketing content with filters (authenticated)
    */
   getAll: async (
     filters?: IContentFilters,

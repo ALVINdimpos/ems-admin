@@ -35,14 +35,14 @@ export function LandingFooter({
   return (
     <footer className="relative overflow-hidden bg-slate-950 pb-8 sm:pb-12 pt-8 sm:pt-10">
       <div className="absolute inset-0 opacity-60">
-        <Image
-          src="/Rectangle%20157978.png"
+        {/* <Image
+          src="/login-background-image.png"
           alt={tLanding("reach.backgroundAlt")}
           fill
           sizes="100vw"
           className="object-cover"
           priority={false}
-        />
+        /> */}
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">

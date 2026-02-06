@@ -29,7 +29,7 @@ export function FeaturedAnnouncementCard({
 
   return (
     <Link
-      href={`/announcements/${announcement.slug}`}
+      href={`/announcements/${announcement.id}`}
       className="group block bg-gradient-to-br from-sky-500/20 via-blue-600/15 to-purple-600/20 rounded-2xl p-6 sm:p-8 border border-sky-400/30 hover:border-sky-400/50 transition-all duration-300 backdrop-blur-sm"
     >
       <div className="flex items-start gap-4">
@@ -78,7 +78,7 @@ export function AnnouncementCard({
 
   return (
     <Link
-      href={`/announcements/${announcement.slug}`}
+      href={`/announcements/${announcement.id}`}
       className="group block bg-gradient-to-b from-[#0D2844]/80 to-[#0A1F35]/80 rounded-xl p-5 border border-white/5 hover:border-sky-500/30 transition-all duration-300 backdrop-blur-sm"
     >
       <div className="flex items-start gap-3">

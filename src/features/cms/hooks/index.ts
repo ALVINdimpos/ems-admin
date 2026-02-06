@@ -703,8 +703,8 @@ export function useAnnouncements(limit = 5): IUseAnnouncementsReturn {
     setError(null);
 
     try {
-      const response = await cmsApi.content.getAll(
-        { type: "ANNOUNCEMENT", status: "PUBLISHED", isActive: true },
+      const response = await cmsApi.content.getPublished(
+        { type: "ANNOUNCEMENT" },
         { limit, sort: { field: "priority", order: "desc" } }
       );
 
@@ -760,8 +760,8 @@ export function useFaq(limit = 10): IUseFaqReturn {
     setError(null);
 
     try {
-      const response = await cmsApi.content.getAll(
-        { type: "FAQ", status: "PUBLISHED", isActive: true },
+      const response = await cmsApi.content.getPublished(
+        { type: "FAQ" },
         { limit, sort: { field: "order", order: "asc" } }
       );
 

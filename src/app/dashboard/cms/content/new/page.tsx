@@ -173,13 +173,10 @@ export default function NewContentPage() {
     );
   }, []);
 
-  // Handle media upload — upload files via media API to get URLs
+  // Handle media upload — store locally as blob URLs (MINIO not yet configured)
   const handleMediaUpload = useCallback(async (files: File[]) => {
-    const response = await cmsApi.media.uploadMultiple(files);
-    if (response.success && response.data) {
-      return response.data.urls;
-    }
-    throw new Error("Failed to upload media files");
+    // Return local preview URLs for now; backend media upload will replace this
+    return files.map((file) => URL.createObjectURL(file));
   }, []);
 
   return (

@@ -17,7 +17,7 @@ import type { IMarketingContent } from "@/features/cms/types";
 
 export default function AnnouncementDetailsPage() {
   const params = useParams();
-  const slug = params.slug as string;
+  const id = params.slug as string;
 
   const [announcement, setAnnouncement] = useState<IMarketingContent | null>(
     null
@@ -31,28 +31,14 @@ export default function AnnouncementDetailsPage() {
       setError(null);
 
       try {
-        // Get all active announcements and find by title/slug
-        const decodedSlug = decodeURIComponent(slug);
-        const allContent = await cmsApi.content.getAll({
-          type: "ANNOUNCEMENT",
-          isActive: true,
-        });
+        // Fetch the single published announcement by ID (public endpoint)
+        const response = await cmsApi.content.getPublishedById(id);
 
-        if (allContent.success && allContent.data) {
-          const found = allContent.data.data.find(
-            (c) =>
-              c.title.toLowerCase().replace(/\s+/g, "-") ===
-                slug.toLowerCase() ||
-              c.title === decodedSlug ||
-              c.title.toLowerCase() === slug.toLowerCase()
-          );
-          if (found) {
-            setAnnouncement(found);
-            return;
-          }
+        if (response.success && response.data) {
+          setAnnouncement(response.data);
+        } else {
+          setError(response.error || "Announcement not found");
         }
-
-        setError("Announcement not found");
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -61,7 +47,7 @@ export default function AnnouncementDetailsPage() {
     };
 
     fetchAnnouncement();
-  }, [slug]);
+  }, [id]);
 
   if (isLoading) {
     return <AnnouncementDetailSkeleton />;

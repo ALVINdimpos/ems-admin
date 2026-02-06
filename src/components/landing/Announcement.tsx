@@ -47,7 +47,7 @@ function AnnouncementCard({ announcement, isFirst }: IAnnouncementCardProps) {
               {announcement.summary}
             </p>
             <Link
-              href={`/announcements/${announcement.slug}`}
+              href={`/announcements/${announcement.id}`}
               className="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 text-sm font-semibold transition-colors group/link"
             >
               Read more
@@ -80,7 +80,7 @@ function AnnouncementCard({ announcement, isFirst }: IAnnouncementCardProps) {
             {announcement.summary}
           </p>
           <Link
-            href={`/announcements/${announcement.slug}`}
+            href={`/announcements/${announcement.id}`}
             className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 text-xs font-semibold transition-colors"
           >
             Learn more
@@ -130,24 +130,13 @@ function LoadingSkeleton() {
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="w-16 h-16 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mb-4">
-        <Megaphone className="w-8 h-8 text-sky-400/50" />
-      </div>
-      <h3 className="text-lg font-semibold text-slate-300 mb-2">
-        No announcements yet
-      </h3>
-      <p className="text-sm text-slate-500 max-w-md">
-        Stay tuned! We&apos;ll share important updates and news here.
-      </p>
-    </div>
-  );
-}
-
 export function AnnouncementSection() {
   const { announcements, isLoading, error } = useAnnouncements(5);
+
+  // Don't render the section at all if there's an error or no announcements
+  if (!isLoading && (error || announcements.length === 0)) {
+    return null;
+  }
 
   return (
     <section className="relative w-full bg-gradient-to-b from-[#0A2540] via-[#0D2137] to-[#0A1628] py-16 sm:py-20 lg:py-28">
@@ -174,18 +163,9 @@ export function AnnouncementSection() {
           </p>
         </div>
 
-        {/* Error State */}
-        {error && (
-          <div className="text-center py-8">
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
-
         {/* Content */}
         {isLoading ? (
           <LoadingSkeleton />
-        ) : announcements.length === 0 ? (
-          <EmptyState />
         ) : (
           <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
             {/* Featured announcement (first one) */}

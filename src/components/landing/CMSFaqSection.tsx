@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, HelpCircle, Loader2, Megaphone } from "lucide-react";
+import { ChevronDown, HelpCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import { useFaq } from "@/features/cms/hooks";
@@ -95,55 +95,18 @@ function LoadingSkeleton() {
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="w-16 h-16 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mb-4">
-        <Megaphone className="w-8 h-8 text-sky-400/50" />
-      </div>
-      <h3 className="text-lg font-semibold text-slate-300 mb-2">
-        No FAQs available
-      </h3>
-      <p className="text-sm text-slate-500 max-w-md">
-        Check back later for frequently asked questions.
-      </p>
-    </div>
-  );
-}
-
-function ErrorState({
-  error,
-  onRetry,
-}: {
-  error: string;
-  onRetry: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
-        <HelpCircle className="w-8 h-8 text-red-400/50" />
-      </div>
-      <h3 className="text-lg font-semibold text-slate-300 mb-2">
-        Failed to load FAQs
-      </h3>
-      <p className="text-sm text-slate-500 max-w-md mb-4">{error}</p>
-      <button
-        onClick={onRetry}
-        className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-lg text-sm font-medium transition-colors"
-      >
-        Try Again
-      </button>
-    </div>
-  );
-}
-
 export function CmsFaqSection() {
-  const { faqs, isLoading, error, refresh } = useFaq(10);
+  const { faqs, isLoading, error } = useFaq(10);
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
+
+  // Don't render the section at all if there's an error or no FAQs
+  if (!isLoading && (error || faqs.length === 0)) {
+    return null;
+  }
 
   return (
     <section id="faq" className="relative w-full overflow-hidden">
@@ -168,10 +131,6 @@ export function CmsFaqSection() {
         {/* FAQ Items */}
         {isLoading ? (
           <LoadingSkeleton />
-        ) : error ? (
-          <ErrorState error={error} onRetry={refresh} />
-        ) : faqs.length === 0 ? (
-          <EmptyState />
         ) : (
           <div className="space-y-4">
             {faqs.map((faq, index) => (
