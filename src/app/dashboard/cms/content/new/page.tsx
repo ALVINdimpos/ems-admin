@@ -17,7 +17,6 @@ import {
 import { useCategories, useTags } from "@/features/cms/hooks";
 import { createContentSchema } from "@/features/cms/schemas";
 import type { ContentType, ContentStatus } from "@/features/cms/types";
-import type { IUploadProgress } from "@/features/cms/utils/chunkedUpload";
 
 // Content status options
 const STATUS_OPTIONS: {
@@ -103,12 +102,6 @@ export default function NewContentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<IUploadProgress | null>(
-    null
-  );
-
-  /** Raw image File objects to be sent with content creation */
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const { categories, isLoading: isCategoriesLoading } = useCategories();
   const { tags, isLoading: isTagsLoading } = useTags();
@@ -145,20 +138,19 @@ export default function NewContentPage() {
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     setSubmitError(null);
-    setUploadProgress(null);
 
     try {
-      const response = await cmsApi.content.create(
-        {
-          ...data,
-          images,
-          videos,
-          links,
-          tagIds: selectedTagIds,
-        },
-        imageFiles.length > 0 ? imageFiles : undefined,
-        (progress) => setUploadProgress(progress)
-      );
+      // Strip status — backend uses isActive, not status
+      const { status, ...rest } = data;
+
+      const response = await cmsApi.content.create({
+        ...rest,
+        images,
+        videos,
+        links,
+        tagIds: selectedTagIds,
+        isActive: status === "PUBLISHED",
+      });
 
       if (response.success && response.data) {
         router.push(`/dashboard/cms/content/${response.data.id}`);
@@ -169,7 +161,6 @@ export default function NewContentPage() {
       setSubmitError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsSubmitting(false);
-      setUploadProgress(null);
     }
   };
 
@@ -182,12 +173,13 @@ export default function NewContentPage() {
     );
   }, []);
 
-  // Handle media upload — store raw files for chunked upload with content
+  // Handle media upload — upload files via media API to get URLs
   const handleMediaUpload = useCallback(async (files: File[]) => {
-    // Store the raw files for submission with the content payload
-    setImageFiles((prev) => [...prev, ...files]);
-    // Return local preview URLs so the UI can show thumbnails immediately
-    return files.map((file) => URL.createObjectURL(file));
+    const response = await cmsApi.media.uploadMultiple(files);
+    if (response.success && response.data) {
+      return response.data.urls;
+    }
+    throw new Error("Failed to upload media files");
   }, []);
 
   return (
@@ -694,30 +686,6 @@ export default function NewContentPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 pt-4">
-          {/* Upload Progress */}
-          {uploadProgress && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-blue-700">
-                  Uploading {uploadProgress.fileName}
-                </p>
-                <span className="text-sm text-blue-600">
-                  {uploadProgress.percent}%
-                </span>
-              </div>
-              <div className="w-full bg-blue-100 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${uploadProgress.percent}%` }}
-                />
-              </div>
-              <p className="text-xs text-blue-500 mt-1">
-                Chunk {uploadProgress.currentChunk} of{" "}
-                {uploadProgress.totalChunks}
-              </p>
-            </div>
-          )}
-
           <div className="flex items-center justify-end gap-3">
             <Link
               href="/dashboard/cms/content"

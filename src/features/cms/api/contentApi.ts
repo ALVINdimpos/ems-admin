@@ -13,10 +13,6 @@ import type {
   IQueryParams,
   ContentStatus,
 } from "../types";
-import {
-  prepareImageChunks,
-  type ProgressCallback,
-} from "../utils/chunkedUpload";
 
 import {
   apiClient,
@@ -109,25 +105,20 @@ export const contentApi = {
   /**
    * Create new marketing content.
    *
-   * Always sends a JSON payload. When `imageFiles` are provided, each image
-   * is split into base64 chunks and included in the body as `imageChunks`
-   * so the backend can reassemble them.
+   * Sends a plain JSON payload matching the backend schema.
+   * Images should already be uploaded via `mediaApi` and referenced by URL.
+   * The frontend `status` field is mapped to `isActive` and stripped.
    */
   create: async (
-    data: ICreateMarketingContent,
-    imageFiles?: File[],
-    onUploadProgress?: ProgressCallback
+    data: ICreateMarketingContent
   ): Promise<IApiResponse<IMarketingContent>> => {
-    let payload: Record<string, unknown> = { ...data };
-
-    // If image files exist, chunk them and attach as base64 in JSON
-    if (imageFiles && imageFiles.length > 0) {
-      const chunkedImages = await prepareImageChunks(
-        imageFiles,
-        onUploadProgress
-      );
-      payload = { ...payload, imageChunks: chunkedImages };
-    }
+    const { status, ...rest } = data as ICreateMarketingContent & {
+      status?: string;
+    };
+    const payload: Record<string, unknown> = {
+      ...rest,
+      isActive: status === "PUBLISHED" ? true : (rest.isActive ?? true),
+    };
 
     return apiClient.post<IMarketingContent>(`/marketing-contents`, payload);
   },
@@ -135,22 +126,18 @@ export const contentApi = {
   /**
    * Update existing content.
    *
-   * Like `create`, images are chunked and embedded in the JSON payload.
+   * Same as `create` — plain JSON, no file uploads.
    */
   update: async (
     id: string,
-    data: Partial<IUpdateMarketingContent>,
-    imageFiles?: File[],
-    onUploadProgress?: ProgressCallback
+    data: Partial<IUpdateMarketingContent>
   ): Promise<IApiResponse<IMarketingContent>> => {
-    let payload: Record<string, unknown> = { ...data };
-
-    if (imageFiles && imageFiles.length > 0) {
-      const chunkedImages = await prepareImageChunks(
-        imageFiles,
-        onUploadProgress
-      );
-      payload = { ...payload, imageChunks: chunkedImages };
+    const { status, ...rest } = data as Partial<IUpdateMarketingContent> & {
+      status?: string;
+    };
+    const payload: Record<string, unknown> = { ...rest };
+    if (status !== undefined) {
+      payload.isActive = status === "PUBLISHED";
     }
 
     return apiClient.patch<IMarketingContent>(

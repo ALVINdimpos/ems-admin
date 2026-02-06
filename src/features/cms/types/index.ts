@@ -150,7 +150,6 @@ export interface ICreateMarketingContent {
   subtitle?: string;
   content: string;
   summary?: string;
-  status?: ContentStatus;
   featuredImage?: string;
   images?: IImageMedia[];
   videos?: IVideoMedia[];

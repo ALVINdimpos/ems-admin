@@ -116,7 +116,8 @@ export const createContentSchema = z
       .string()
       .max(500, "Summary must not exceed 500 characters")
       .optional(),
-    status: contentStatusSchema.default("DRAFT"),
+    // status is used by the form UI only; stripped before sending to backend
+    status: contentStatusSchema.optional(),
     images: z.array(imageMediaSchema).default([]),
     videos: z.array(videoMediaSchema).default([]),
     links: z.array(linkSchema).default([]),
@@ -158,6 +159,7 @@ export const updateContentSchema = z.object({
     .string()
     .max(500, "Summary must not exceed 500 characters")
     .optional(),
+  // status is used by the form UI only; stripped before sending to backend
   status: contentStatusSchema.optional(),
   images: z.array(imageMediaSchema).optional(),
   videos: z.array(videoMediaSchema).optional(),

@@ -223,12 +223,18 @@ export default function EditContentPage() {
     setError(null);
 
     try {
+      // Strip status — backend uses isActive, not status
+      const { status, ...rest } = data as UpdateContentFormData & {
+        status?: string;
+      };
+
       const response = await cmsApi.content.update(contentId, {
-        ...data,
+        ...rest,
         images,
         videos,
         links,
         tagIds: selectedTagIds,
+        isActive: status === "PUBLISHED",
       });
 
       if (response.success && response.data) {

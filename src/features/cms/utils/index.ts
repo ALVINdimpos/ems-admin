@@ -13,16 +13,3 @@ export function generateSlug(text: string): string {
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
-
-// Re-export chunked upload utilities
-export {
-  chunkFile,
-  chunkFiles,
-  prepareImageChunks,
-  fileToBase64,
-  fileToRawBase64,
-  type IFileChunk,
-  type IChunkedFile,
-  type IUploadProgress,
-  type ProgressCallback,
-} from "./chunkedUpload";
