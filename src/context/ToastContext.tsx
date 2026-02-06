@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 
@@ -21,7 +22,6 @@ export interface IToast {
 }
 
 interface IToastContextType {
-  toasts: IToast[];
   addToast: (toast: Omit<IToast, "id">) => void;
   removeToast: (id: string) => void;
   success: (title: string, message?: string) => void;
@@ -85,10 +85,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [addToast]
   );
 
+  const value = useMemo<IToastContextType>(
+    () => ({ addToast, removeToast, success, error, warning, info }),
+    [addToast, removeToast, success, error, warning, info]
+  );
+
   return (
-    <ToastContext.Provider
-      value={{ toasts, addToast, removeToast, success, error, warning, info }}
-    >
+    <ToastContext.Provider value={value}>
       {children}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>

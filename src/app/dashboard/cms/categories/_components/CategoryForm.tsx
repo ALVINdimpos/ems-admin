@@ -5,7 +5,6 @@ import React, { useState } from "react";
 
 import Input from "@/components/ui/Input";
 import type { IContentCategory } from "@/features/cms/types";
-import { generateSlug } from "@/features/cms/utils";
 
 interface ICategoryFormProps {
   category?: IContentCategory | null;
@@ -23,23 +22,20 @@ export function CategoryForm({
   isSubmitting = false,
 }: ICategoryFormProps) {
   const [name, setName] = useState(category?.name || "");
-  const [slug, setSlug] = useState(category?.slug || "");
   const [description, setDescription] = useState(category?.description || "");
   const [parentId, setParentId] = useState(category?.parentId || "");
   const [isActive, setIsActive] = useState(category?.isActive ?? true);
-  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Handle name change and auto-generate slug
+  // Handle name change
   const handleNameChange = (value: string) => {
     setName(value);
-    if (!isSlugManuallyEdited) {
-      setSlug(generateSlug(value));
-    }
   };
 
-  // Validate form
-  const validate = (): boolean => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate form
     const newErrors: Record<string, string> = {};
 
     if (!name.trim()) {
@@ -48,20 +44,6 @@ export function CategoryForm({
       newErrors.name = "Name must be at least 2 characters";
     } else if (name.length > 100) {
       newErrors.name = "Name must not exceed 100 characters";
-    }
-
-    if (!slug.trim()) {
-      newErrors.slug = "Slug is required";
-    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-      newErrors.slug = "Slug must be lowercase with hyphens only";
-    }
-
-    // Check for duplicate slug
-    const existingCategory = categories.find(
-      (c) => c.slug === slug && c.id !== category?.id
-    );
-    if (existingCategory) {
-      newErrors.slug = "This slug is already in use";
     }
 
     if (description && description.length > 500) {
@@ -74,16 +56,10 @@ export function CategoryForm({
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+    if (Object.keys(newErrors).length > 0) return;
 
     onSubmit({
       name: name.trim(),
-      slug: slug.trim(),
       description: description.trim() || undefined,
       parentId: parentId || undefined,
       isActive,
@@ -106,46 +82,6 @@ export function CategoryForm({
         error={errors.name}
         disabled={isSubmitting}
       />
-
-      {/* Slug */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Slug *
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={slug}
-            onChange={(e) => {
-              setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"));
-              setIsSlugManuallyEdited(true);
-            }}
-            placeholder="category-slug"
-            disabled={isSubmitting}
-            className={`flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.slug ? "border-red-500" : "border-gray-300"
-            } ${isSubmitting ? "bg-gray-100 cursor-not-allowed" : ""}`}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              setSlug(generateSlug(name));
-              setIsSlugManuallyEdited(false);
-            }}
-            disabled={isSubmitting || !name}
-            className="px-3 py-2 text-sm text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Regenerate from name"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </button>
-        </div>
-        {errors.slug && (
-          <p className="mt-1 text-sm text-red-600">{errors.slug}</p>
-        )}
-        <p className="mt-1 text-xs text-gray-500">
-          URL-friendly identifier (lowercase, hyphens only)
-        </p>
-      </div>
 
       {/* Description */}
       <div>

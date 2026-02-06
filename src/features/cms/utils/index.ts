@@ -1,15 +1,27 @@
 /**
- * CMS Utilities - Barrel export file
+ * CMS Utilities
  */
 
+/**
+ * Generate a URL-friendly slug from text
+ */
+export function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// Re-export chunked upload utilities
 export {
-  generateSlug,
-  generateId,
-  mockCategories,
-  mockTags,
-  mockContents,
-  mockStats,
-  categoryStore,
-  tagStore,
-  contentStore,
-} from "./mockData";
+  chunkFile,
+  chunkFiles,
+  buildContentFormData,
+  fileToDataUri,
+  type IFileChunk,
+  type IChunkedFile,
+  type IUploadProgress,
+  type ProgressCallback,
+} from "./chunkedUpload";

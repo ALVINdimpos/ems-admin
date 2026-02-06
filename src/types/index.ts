@@ -17,6 +17,8 @@ export interface IApiResponse<T = any> {
   data?: T;
   error?: string;
   message?: string;
+  meta?: Record<string, unknown>;
+  total?: number;
 }
 
 export interface IPaginationParams {

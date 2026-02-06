@@ -22,8 +22,14 @@ const STATUS_STYLES: Record<
   SCHEDULED: { bg: "bg-blue-100", text: "text-blue-700", label: "Scheduled" },
 };
 
+const FALLBACK_STATUS_STYLE = {
+  bg: "bg-gray-100",
+  text: "text-gray-500",
+  label: "Unknown",
+};
+
 export function StatusBadge({ status, className }: IStatusBadgeProps) {
-  const styles = STATUS_STYLES[status];
+  const styles = STATUS_STYLES[status] ?? FALLBACK_STATUS_STYLE;
 
   return (
     <span
@@ -67,8 +73,14 @@ const TYPE_STYLES: Record<
   FEATURE: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Feature" },
 };
 
+const FALLBACK_TYPE_STYLE = {
+  bg: "bg-gray-100",
+  text: "text-gray-500",
+  label: "Other",
+};
+
 export function TypeBadge({ type, className }: ITypeBadgeProps) {
-  const styles = TYPE_STYLES[type];
+  const styles = TYPE_STYLES[type] ?? FALLBACK_TYPE_STYLE;
 
   return (
     <span

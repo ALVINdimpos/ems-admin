@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 
-import { cmsApi } from "../api/cmsApi";
+import { cmsApi } from "../api";
 import type {
   IMarketingContent,
   IContentCategory,
@@ -108,13 +108,14 @@ interface IUseSelectionReturn<T extends { id: string }> {
 }
 
 export function useSelection<T extends { id: string }>(
-  items: T[]
+  items: T[] = [] as T[]
 ): IUseSelectionReturn<T> {
+  const safeItems = useMemo(() => items ?? [], [items]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const selectedItems = useMemo(
-    () => items.filter((item) => selectedIds.has(item.id)),
-    [items, selectedIds]
+    () => safeItems.filter((item) => selectedIds.has(item.id)),
+    [safeItems, selectedIds]
   );
 
   const isSelected = useCallback(
@@ -123,8 +124,10 @@ export function useSelection<T extends { id: string }>(
   );
 
   const isAllSelected = useMemo(
-    () => items.length > 0 && items.every((item) => selectedIds.has(item.id)),
-    [items, selectedIds]
+    () =>
+      safeItems.length > 0 &&
+      safeItems.every((item) => selectedIds.has(item.id)),
+    [safeItems, selectedIds]
   );
 
   const isSomeSelected = useMemo(
@@ -148,9 +151,9 @@ export function useSelection<T extends { id: string }>(
     if (isAllSelected) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(items.map((item) => item.id)));
+      setSelectedIds(new Set(safeItems.map((item) => item.id)));
     }
-  }, [items, isAllSelected]);
+  }, [safeItems, isAllSelected]);
 
   const select = useCallback((ids: string[]) => {
     setSelectedIds((prev) => new Set([...prev, ...ids]));
@@ -207,7 +210,7 @@ interface IUseContentReturn {
   ) => Promise<IMarketingContent | null>;
   remove: (id: string) => Promise<boolean>;
   bulkAction: (action: BulkAction, ids: string[]) => Promise<boolean>;
-  publish: (id: string) => Promise<boolean>;
+  activate: (id: string) => Promise<boolean>;
   archive: (id: string) => Promise<boolean>;
 }
 
@@ -233,8 +236,8 @@ export function useContent(): IUseContentReturn {
     try {
       const response = await cmsApi.content.getAll(filters, params);
       if (response.success && response.data) {
-        setContents(response.data.data);
-        setTotal(response.data.total);
+        setContents(response.data.data ?? []);
+        setTotal(response.data.total ?? 0);
       } else {
         setError(response.error || "Failed to fetch content");
       }
@@ -348,9 +351,9 @@ export function useContent(): IUseContentReturn {
     [fetchContents]
   );
 
-  const publish = useCallback(async (id: string) => {
+  const activate = useCallback(async (id: string) => {
     try {
-      const response = await cmsApi.content.publish(id);
+      const response = await cmsApi.content.update(id, { isActive: true });
       if (response.success && response.data) {
         setContents((prev) =>
           prev.map((c) => (c.id === id ? response.data! : c))
@@ -394,7 +397,7 @@ export function useContent(): IUseContentReturn {
     update,
     remove,
     bulkAction,
-    publish,
+    activate,
     archive,
   };
 }
@@ -430,7 +433,9 @@ export function useCategories(
     try {
       const response = await cmsApi.categories.getAll(filters);
       if (response.success && response.data) {
-        setCategories(response.data);
+        // response.data is the array of categories
+        const items = Array.isArray(response.data) ? response.data : [];
+        setCategories(items);
       } else {
         setError(response.error || "Failed to fetch categories");
       }
@@ -547,7 +552,8 @@ export function useTags(filters?: ITagFilters): IUseTagsReturn {
     try {
       const response = await cmsApi.tags.getAll(filters);
       if (response.success && response.data) {
-        setTags(response.data);
+        const items = Array.isArray(response.data) ? response.data : [];
+        setTags(items);
       } else {
         setError(response.error || "Failed to fetch tags");
       }
@@ -756,7 +762,7 @@ export function useFaq(limit = 10): IUseFaqReturn {
     try {
       const response = await cmsApi.content.getAll(
         { type: "FAQ", status: "PUBLISHED", isActive: true },
-        { limit, sort: { field: "priority", order: "desc" } }
+        { limit, sort: { field: "order", order: "asc" } }
       );
 
       if (response.success && response.data) {
@@ -765,7 +771,7 @@ export function useFaq(limit = 10): IUseFaqReturn {
           id: content.id,
           question: content.title,
           answer: content.content,
-          priority: content.priority,
+          priority: content.order || 0,
         }));
         setFaqs(faqItems);
       } else {

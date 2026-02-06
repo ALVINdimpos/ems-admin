@@ -57,34 +57,68 @@ export interface IContentMetadata {
   keywords?: string[];
   openGraphImage?: string;
   customFields?: Record<string, unknown>;
+  sponsor?: string;
+  [key: string]: unknown;
+}
+
+// Media types
+export interface IImageMedia {
+  url: string;
+  altText: string;
+  order: number;
+}
+
+export interface IVideoMedia {
+  url: string;
+  title: string;
+  order: number;
+}
+
+export interface ILink {
+  url: string;
+  label: string;
+}
+
+// Content Author (embedded)
+export interface IContentAuthor {
+  id: string;
+  name: string;
+  email: string;
 }
 
 // Marketing Content
 export interface IMarketingContent extends IBaseEntity {
   title: string;
-  slug: string;
+  slug?: string;
+  subtitle?: string;
   type: ContentType;
+  /** Derived on the frontend from `isActive` (backend has no status enum). */
   status: ContentStatus;
-  summary?: string;
   content: string;
+  summary?: string;
   featuredImage?: string;
-  mediaUrls?: string[];
+  images?: IImageMedia[];
+  videos?: IVideoMedia[];
+  links?: ILink[];
   metadata?: IContentMetadata;
+  isActive: boolean;
+  order?: number;
+  priority?: number;
+  viewCount?: number;
+  startDate?: string;
+  endDate?: string;
   publishedAt?: string;
   scheduledAt?: string;
-  expiresAt?: string;
-  priority: number;
-  isActive: boolean;
-  viewCount: number;
   categoryId?: string;
   category?: IContentCategory;
   tags?: IContentTag[];
-  authorId: string;
-  author?: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  authorId?: string;
+  author?: IContentAuthor;
+  eventId?: string | null;
+  organizationId?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedAt?: string | null;
 }
 
 // Form data types for CRUD operations
@@ -102,7 +136,6 @@ export interface IUpdateContentCategory extends Partial<ICreateContentCategory> 
 export interface ICreateContentTag {
   name: string;
   color: string;
-  isActive?: boolean;
 }
 
 export interface IUpdateContentTag extends Partial<ICreateContentTag> {
@@ -110,18 +143,22 @@ export interface IUpdateContentTag extends Partial<ICreateContentTag> {
 }
 
 export interface ICreateMarketingContent {
-  title: string;
   type: ContentType;
-  status?: ContentStatus;
-  summary?: string;
+  title: string;
+  subtitle?: string;
   content: string;
+  summary?: string;
+  status?: ContentStatus;
   featuredImage?: string;
-  mediaUrls?: string[];
+  images?: IImageMedia[];
+  videos?: IVideoMedia[];
+  links?: ILink[];
   metadata?: IContentMetadata;
-  scheduledAt?: string;
-  expiresAt?: string;
-  priority?: number;
   isActive?: boolean;
+  order?: number;
+  priority?: number;
+  startDate?: string;
+  endDate?: string;
   categoryId?: string;
   tagIds?: string[];
 }
@@ -147,7 +184,6 @@ export interface IContentFilters {
   search?: string;
   dateFrom?: string;
   dateTo?: string;
-  authorId?: string;
 }
 
 export interface ICategoryFilters {

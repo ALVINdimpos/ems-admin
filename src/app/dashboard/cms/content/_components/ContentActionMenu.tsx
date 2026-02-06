@@ -3,20 +3,18 @@
 import { Eye, Edit, Send, Archive, Copy, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-import type { ContentStatus } from "@/features/cms/types";
-
 interface IContentActionMenuProps {
   contentId: string;
-  status: ContentStatus;
-  onPublish: (id: string) => void;
+  isActive: boolean;
+  onActivate: (id: string) => void;
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
 export function ContentActionMenu({
   contentId,
-  status,
-  onPublish,
+  isActive,
+  onActivate,
   onArchive,
   onDelete,
 }: IContentActionMenuProps) {
@@ -36,22 +34,22 @@ export function ContentActionMenu({
         <Edit className="h-4 w-4" />
         Edit
       </Link>
-      {status === "DRAFT" && (
+      {!isActive && (
         <button
-          onClick={() => onPublish(contentId)}
+          onClick={() => onActivate(contentId)}
           className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
         >
           <Send className="h-4 w-4" />
-          Publish
+          Activate
         </button>
       )}
-      {status === "PUBLISHED" && (
+      {isActive && (
         <button
           onClick={() => onArchive(contentId)}
           className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
         >
           <Archive className="h-4 w-4" />
-          Archive
+          Deactivate
         </button>
       )}
       <button

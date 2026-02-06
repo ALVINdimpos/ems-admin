@@ -14,8 +14,11 @@ import {
 
 import Modal from "@/components/ui/Modal";
 import { useToast } from "@/context/ToastContext";
-import type { IContentCategory } from "@/features/cms/types";
-import { categoryStore } from "@/features/cms/utils";
+import { cmsApi } from "@/features/cms/api";
+import type {
+  IContentCategory,
+  ICreateContentCategory,
+} from "@/features/cms/types";
 
 export default function CategoriesPage() {
   const toast = useToast();
@@ -36,14 +39,25 @@ export default function CategoriesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFilterActive, setIsFilterActive] = useState<boolean | null>(null);
 
-  const loadCategories = useCallback(() => {
+  const loadCategories = useCallback(async () => {
     setIsLoading(true);
-    // Simulate API delay
-    setTimeout(() => {
-      setCategories(categoryStore.getAll());
+    try {
+      const response = await cmsApi.categories.getAll();
+      if (response.success && response.data) {
+        const items = Array.isArray(response.data) ? response.data : [];
+        setCategories(items);
+      } else {
+        toast.error("Error", response.error || "Failed to load categories");
+      }
+    } catch (error) {
+      toast.error(
+        "Error",
+        error instanceof Error ? error.message : "Failed to load categories"
+      );
+    } finally {
       setIsLoading(false);
-    }, 300);
-  }, []);
+    }
+  }, [toast]);
 
   useEffect(() => {
     loadCategories();
@@ -65,58 +79,66 @@ export default function CategoriesPage() {
 
   // Handle create/update
   const handleFormSubmit = useCallback(
-    (data: Partial<IContentCategory>) => {
+    async (data: Partial<IContentCategory>) => {
       setIsSubmitting(true);
 
-      // Simulate API delay
-      setTimeout(() => {
-        try {
-          if (editingCategory) {
-            // Update existing
-            const updated = categoryStore.update(editingCategory.id, data);
-            if (updated) {
-              setCategories((prev) =>
-                prev.map((c) => (c.id === updated.id ? updated : c))
-              );
-              toast.success(
-                "Category Updated",
-                `"${updated.name}" has been updated successfully`
-              );
-            }
-          } else {
-            // Create new
-            const created = categoryStore.create(
-              data as Omit<IContentCategory, "id" | "createdAt" | "updatedAt">
+      try {
+        if (editingCategory) {
+          // Update existing
+          const response = await cmsApi.categories.update(
+            editingCategory.id,
+            data
+          );
+          if (response.success && response.data) {
+            setCategories((prev) =>
+              prev.map((c) => (c.id === response.data!.id ? response.data! : c))
             );
-            setCategories((prev) => [...prev, created]);
+            toast.success(
+              "Category Updated",
+              `"${response.data.name}" has been updated successfully`
+            );
+          } else {
+            toast.error("Error", response.error || "Failed to update category");
+          }
+        } else {
+          // Create new
+          const response = await cmsApi.categories.create(
+            data as ICreateContentCategory
+          );
+          if (response.success && response.data) {
+            setCategories((prev) => [...prev, response.data!]);
             toast.success(
               "Category Created",
-              `"${created.name}" has been created successfully`
+              `"${response.data.name}" has been created successfully`
             );
+          } else {
+            toast.error("Error", response.error || "Failed to create category");
           }
-
-          setIsFormModalOpen(false);
-          setEditingCategory(null);
-        } catch {
-          toast.error("Error", "An error occurred. Please try again.");
-        } finally {
-          setIsSubmitting(false);
         }
-      }, 500);
+
+        setIsFormModalOpen(false);
+        setEditingCategory(null);
+      } catch (error) {
+        toast.error(
+          "Error",
+          error instanceof Error ? error.message : "An error occurred"
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
     },
     [editingCategory, toast]
   );
 
   // Handle delete
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (!deletingCategory) return;
 
     setIsSubmitting(true);
 
-    // Simulate API delay
-    setTimeout(() => {
-      const isSuccess = categoryStore.delete(deletingCategory.id);
-      if (isSuccess) {
+    try {
+      const response = await cmsApi.categories.delete(deletingCategory.id);
+      if (response.success) {
         setCategories((prev) =>
           prev.filter((c) => c.id !== deletingCategory.id)
         );
@@ -125,13 +147,22 @@ export default function CategoriesPage() {
           `"${deletingCategory.name}" has been deleted successfully`
         );
       } else {
-        toast.error("Delete Failed", "Failed to delete category");
+        toast.error(
+          "Delete Failed",
+          response.error || "Failed to delete category"
+        );
       }
 
       setIsDeleteModalOpen(false);
       setDeletingCategory(null);
+    } catch (error) {
+      toast.error(
+        "Error",
+        error instanceof Error ? error.message : "Failed to delete category"
+      );
+    } finally {
       setIsSubmitting(false);
-    }, 500);
+    }
   }, [deletingCategory, toast]);
 
   // Open create modal

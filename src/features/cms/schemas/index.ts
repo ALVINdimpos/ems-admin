@@ -28,6 +28,32 @@ export const contentStatusSchema = z.enum([
 // Hex color pattern
 const hexColorPattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 
+// Schema for datetime-local inputs — accepts "YYYY-MM-DDTHH:mm" and converts to ISO
+const datetimeLocalSchema = z
+  .string()
+  .refine((val) => !val || !isNaN(Date.parse(val)), "Invalid date")
+  .transform((val) => (val ? new Date(val).toISOString() : undefined));
+
+// Image media schema
+const imageMediaSchema = z.object({
+  url: z.string().min(1, "URL is required"),
+  altText: z.string(),
+  order: z.number().int().min(0),
+});
+
+// Video media schema
+const videoMediaSchema = z.object({
+  url: z.string().min(1, "URL is required"),
+  title: z.string(),
+  order: z.number().int().min(0),
+});
+
+// Link schema
+const linkSchema = z.object({
+  url: z.string().min(1, "URL is required"),
+  label: z.string(),
+});
+
 // Content metadata schema
 export const contentMetadataSchema = z.object({
   seoTitle: z.string().max(70).optional(),
@@ -35,6 +61,7 @@ export const contentMetadataSchema = z.object({
   keywords: z.array(z.string()).optional(),
   openGraphImage: z.url().optional(),
   customFields: z.record(z.string(), z.unknown()).optional(),
+  sponsor: z.string().optional(),
 });
 
 // Content Category schemas
@@ -64,7 +91,6 @@ export const createTagSchema = z.object({
   color: z
     .string()
     .regex(hexColorPattern, "Must be a valid hex color (e.g., #FF5733)"),
-  isActive: z.boolean().default(true),
 });
 
 export const updateTagSchema = createTagSchema.partial().extend({
@@ -74,83 +100,69 @@ export const updateTagSchema = createTagSchema.partial().extend({
 // Marketing Content schemas
 export const createContentSchema = z
   .object({
+    type: contentTypeSchema,
     title: z
       .string()
       .min(3, "Title must be at least 3 characters")
       .max(200, "Title must not exceed 200 characters"),
-    type: contentTypeSchema,
-    status: contentStatusSchema,
+    subtitle: z
+      .string()
+      .max(500, "Subtitle must not exceed 500 characters")
+      .optional(),
+    content: z.string().min(1, "Content is required"),
     summary: z
       .string()
       .max(500, "Summary must not exceed 500 characters")
       .optional(),
-    content: z.string().min(1, "Content is required"),
-    featuredImage: z
-      .string()
-      .url("Must be a valid URL")
-      .optional()
-      .or(z.literal("")),
-    mediaUrls: z.array(z.string().url()).optional(),
+    images: z.array(imageMediaSchema).default([]),
+    videos: z.array(videoMediaSchema).default([]),
+    links: z.array(linkSchema).default([]),
     metadata: contentMetadataSchema.optional(),
-    scheduledAt: z.string().optional(),
-    expiresAt: z.string().optional(),
-    priority: z.number().int().min(0).max(100),
-    isActive: z.boolean(),
+    isActive: z.boolean().default(true),
+    order: z.number().int().min(0).default(0),
+    startDate: datetimeLocalSchema.optional(),
+    endDate: datetimeLocalSchema.optional(),
     categoryId: z.string().optional(),
     tagIds: z.array(z.string()).optional(),
   })
   .refine(
     (data) => {
-      // If status is SCHEDULED, scheduledAt must be provided
-      if (data.status === "SCHEDULED" && !data.scheduledAt) {
-        return false;
+      // endDate must be after startDate if both are provided
+      if (data.startDate && data.endDate) {
+        return new Date(data.endDate) > new Date(data.startDate);
       }
       return true;
     },
     {
-      message: "Scheduled date is required when status is SCHEDULED",
-      path: ["scheduledAt"],
-    }
-  )
-  .refine(
-    (data) => {
-      // expiresAt must be after scheduledAt or publishedAt
-      if (data.expiresAt && data.scheduledAt) {
-        return new Date(data.expiresAt) > new Date(data.scheduledAt);
-      }
-      return true;
-    },
-    {
-      message: "Expiration date must be after the scheduled date",
-      path: ["expiresAt"],
+      message: "End date must be after start date",
+      path: ["endDate"],
     }
   );
 
 export const updateContentSchema = z.object({
-  id: z.string().uuid(),
+  type: contentTypeSchema.optional(),
   title: z
     .string()
     .min(3, "Title must be at least 3 characters")
     .max(200, "Title must not exceed 200 characters")
     .optional(),
-  type: contentTypeSchema.optional(),
-  status: contentStatusSchema.optional(),
+  subtitle: z
+    .string()
+    .max(500, "Subtitle must not exceed 500 characters")
+    .optional(),
+  content: z.string().min(1, "Content is required").optional(),
   summary: z
     .string()
     .max(500, "Summary must not exceed 500 characters")
     .optional(),
-  content: z.string().min(1, "Content is required").optional(),
-  featuredImage: z
-    .string()
-    .url("Must be a valid URL")
-    .optional()
-    .or(z.literal("")),
-  mediaUrls: z.array(z.string().url()).optional(),
+  images: z.array(imageMediaSchema).optional(),
+  videos: z.array(videoMediaSchema).optional(),
+  links: z.array(linkSchema).optional(),
   metadata: contentMetadataSchema.optional(),
-  scheduledAt: z.string().datetime().optional(),
-  expiresAt: z.string().datetime().optional(),
-  priority: z.number().int().min(0).max(100).optional(),
   isActive: z.boolean().optional(),
+  order: z.number().int().min(0).optional(),
+  startDate: datetimeLocalSchema.optional(),
+  endDate: datetimeLocalSchema.optional(),
   categoryId: z.string().optional(),
   tagIds: z.array(z.string()).optional(),
 });

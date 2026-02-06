@@ -8,16 +8,22 @@ import {
   ContentEmptyState,
   ContentTableRow,
   ContentPagination,
+  ContentDeleteDialog,
   ErrorAlert,
 } from "./_components";
 
+import Modal from "@/components/ui/Modal";
 import {
   SearchFilter,
   BulkActions,
   type IFilterField,
 } from "@/features/cms/components";
 import { useContent, useSelection, useCategories } from "@/features/cms/hooks";
-import type { BulkAction, IContentFilters } from "@/features/cms/types";
+import type {
+  BulkAction,
+  IContentFilters,
+  IMarketingContent,
+} from "@/features/cms/types";
 
 // Content type options for filter
 const CONTENT_TYPE_OPTIONS = [
@@ -31,12 +37,10 @@ const CONTENT_TYPE_OPTIONS = [
   { label: "Feature", value: "FEATURE" },
 ];
 
-// Status options for filter
+// Status options for filter (maps to backend `isActive` boolean)
 const STATUS_OPTIONS = [
-  { label: "Draft", value: "DRAFT" },
-  { label: "Published", value: "PUBLISHED" },
-  { label: "Archived", value: "ARCHIVED" },
-  { label: "Scheduled", value: "SCHEDULED" },
+  { label: "Active", value: "true" },
+  { label: "Inactive", value: "false" },
 ];
 
 export default function ContentListPage() {
@@ -51,7 +55,7 @@ export default function ContentListPage() {
     refresh,
     remove,
     bulkAction,
-    publish,
+    activate,
     archive,
   } = useContent();
 
@@ -60,6 +64,10 @@ export default function ContentListPage() {
   const selection = useSelection(contents);
   const [searchValue, setSearchValue] = useState(filters.search || "");
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingContent, setDeletingContent] =
+    useState<IMarketingContent | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Build filter fields
   const filterFields: IFilterField[] = [
@@ -71,7 +79,7 @@ export default function ContentListPage() {
       placeholder: "All types",
     },
     {
-      key: "status",
+      key: "isActive",
       label: "Status",
       type: "select",
       options: STATUS_OPTIONS,
@@ -83,11 +91,6 @@ export default function ContentListPage() {
       type: "select",
       options: categories.map((c) => ({ label: c.name, value: c.id })),
       placeholder: "All categories",
-    },
-    {
-      key: "isActive",
-      label: "Active",
-      type: "boolean",
     },
     {
       key: "dateRange",
@@ -135,23 +138,39 @@ export default function ContentListPage() {
     [selection, bulkAction]
   );
 
-  // Handle single item delete
-  const handleDelete = useCallback(
-    async (id: string) => {
-      if (confirm("Are you sure you want to delete this content?")) {
-        await remove(id);
+  // Open delete confirmation modal
+  const handleDeleteClick = useCallback(
+    (id: string) => {
+      const content = contents.find((c) => c.id === id);
+      if (content) {
+        setDeletingContent(content);
+        setIsDeleteModalOpen(true);
+        setActionMenuOpen(null);
       }
     },
-    [remove]
+    [contents]
   );
 
-  // Handle publish
-  const handlePublish = useCallback(
+  // Confirm delete
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deletingContent) return;
+    setIsDeleting(true);
+    try {
+      await remove(deletingContent.id);
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
+      setDeletingContent(null);
+    }
+  }, [deletingContent, remove]);
+
+  // Handle activate
+  const handleActivate = useCallback(
     async (id: string) => {
-      await publish(id);
+      await activate(id);
       setActionMenuOpen(null);
     },
-    [publish]
+    [activate]
   );
 
   // Handle archive
@@ -247,9 +266,9 @@ export default function ContentListPage() {
                     isMenuOpen={actionMenuOpen === content.id}
                     onSelect={() => selection.toggle(content.id)}
                     onMenuToggle={() => handleMenuToggle(content.id)}
-                    onPublish={handlePublish}
+                    onActivate={handleActivate}
                     onArchive={handleArchive}
-                    onDelete={handleDelete}
+                    onDelete={handleDeleteClick}
                   />
                 ))
               )}
@@ -266,6 +285,33 @@ export default function ContentListPage() {
           onPageChange={setPage}
         />
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          if (!isDeleting) {
+            setIsDeleteModalOpen(false);
+            setDeletingContent(null);
+          }
+        }}
+        title=""
+        size="sm"
+        showCloseButton={false}
+        backdropClassName="bg-black/60 backdrop-blur-sm"
+      >
+        {deletingContent && (
+          <ContentDeleteDialog
+            content={deletingContent}
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => {
+              setIsDeleteModalOpen(false);
+              setDeletingContent(null);
+            }}
+            isDeleting={isDeleting}
+          />
+        )}
+      </Modal>
     </div>
   );
 }

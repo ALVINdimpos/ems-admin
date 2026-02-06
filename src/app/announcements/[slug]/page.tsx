@@ -12,7 +12,7 @@ import {
   AnnouncementNotFound,
 } from "./_components";
 
-import { cmsApi } from "@/features/cms/api/cmsApi";
+import { cmsApi } from "@/features/cms/api";
 import type { IMarketingContent } from "@/features/cms/types";
 
 export default function AnnouncementDetailsPage() {
@@ -31,37 +31,28 @@ export default function AnnouncementDetailsPage() {
       setError(null);
 
       try {
-        // Try to get by slug first
-        let response = await cmsApi.content.getBySlug(slug);
+        // Get all active announcements and find by title/slug
+        const decodedSlug = decodeURIComponent(slug);
+        const allContent = await cmsApi.content.getAll({
+          type: "ANNOUNCEMENT",
+          isActive: true,
+        });
 
-        // If not found by slug, try searching by title (for URL-encoded titles)
-        if (!response.success || !response.data) {
-          const decodedSlug = decodeURIComponent(slug);
-          const allContent = await cmsApi.content.getAll({
-            type: "ANNOUNCEMENT",
-            status: "PUBLISHED",
-          });
-
-          if (allContent.success && allContent.data) {
-            const found = allContent.data.data.find(
-              (c) =>
-                c.slug === slug ||
-                c.slug === decodedSlug ||
-                c.title.toLowerCase().replace(/\s+/g, "-") ===
-                  slug.toLowerCase() ||
-                c.title === decodedSlug
-            );
-            if (found) {
-              response = { success: true, data: found };
-            }
+        if (allContent.success && allContent.data) {
+          const found = allContent.data.data.find(
+            (c) =>
+              c.title.toLowerCase().replace(/\s+/g, "-") ===
+                slug.toLowerCase() ||
+              c.title === decodedSlug ||
+              c.title.toLowerCase() === slug.toLowerCase()
+          );
+          if (found) {
+            setAnnouncement(found);
+            return;
           }
         }
 
-        if (response.success && response.data) {
-          setAnnouncement(response.data);
-        } else {
-          setError("Announcement not found");
-        }
+        setError("Announcement not found");
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -86,7 +77,6 @@ export default function AnnouncementDetailsPage() {
       <AnnouncementDetailHeader
         title={announcement.title}
         summary={announcement.summary}
-        status={announcement.status}
       />
 
       {/* Content */}

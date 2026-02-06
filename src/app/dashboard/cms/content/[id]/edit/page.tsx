@@ -8,7 +8,21 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 
 import Input from "@/components/ui/Input";
-import { cmsApi } from "@/features/cms/api/cmsApi";
+
+/**
+ * Convert an ISO date string to the `datetime-local` input format (YYYY-MM-DDTHH:mm).
+ * Returns an empty string if the value is falsy or unparseable.
+ */
+function toDatetimeLocal(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  // Offset to local time
+  const offset = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - offset * 60_000);
+  return local.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
+}
+import { cmsApi } from "@/features/cms/api";
 import {
   RichTextEditor,
   MediaUpload,
@@ -19,27 +33,42 @@ import {
   updateContentSchema,
   type UpdateContentFormData,
 } from "@/features/cms/schemas";
-import type {
-  ContentType,
-  ContentStatus,
-  IMarketingContent,
-} from "@/features/cms/types";
+import type { ContentType, IMarketingContent } from "@/features/cms/types";
 
-const CONTENT_TYPES: { value: ContentType; label: string }[] = [
-  { value: "BANNER", label: "Banner" },
-  { value: "HERO", label: "Hero" },
-  { value: "PROMOTION", label: "Promotion" },
-  { value: "ANNOUNCEMENT", label: "Announcement" },
-  { value: "BLOG", label: "Blog" },
-  { value: "TESTIMONIAL", label: "Testimonial" },
-  { value: "FAQ", label: "FAQ" },
-  { value: "FEATURE", label: "Feature" },
-];
-
-const STATUS_OPTIONS: { value: ContentStatus; label: string }[] = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "PUBLISHED", label: "Published" },
-  { value: "SCHEDULED", label: "Scheduled" },
+// Content type options
+const CONTENT_TYPES: {
+  value: ContentType;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "BANNER",
+    label: "Banner",
+    description: "Homepage or section banners",
+  },
+  { value: "HERO", label: "Hero", description: "Hero section content" },
+  {
+    value: "PROMOTION",
+    label: "Promotion",
+    description: "Promotional content",
+  },
+  {
+    value: "ANNOUNCEMENT",
+    label: "Announcement",
+    description: "Important announcements",
+  },
+  { value: "BLOG", label: "Blog", description: "Blog posts and articles" },
+  {
+    value: "TESTIMONIAL",
+    label: "Testimonial",
+    description: "Customer testimonials",
+  },
+  { value: "FAQ", label: "FAQ", description: "Frequently asked questions" },
+  {
+    value: "FEATURE",
+    label: "Feature",
+    description: "Product/service features",
+  },
 ];
 
 export default function EditContentPage() {
@@ -56,18 +85,23 @@ export default function EditContentPage() {
   const { categories } = useCategories();
   const { tags } = useTags();
 
+  const [images, setImages] = useState<
+    Array<{ url: string; altText: string; order: number }>
+  >([]);
+  const [videos, setVideos] = useState<
+    Array<{ url: string; title: string; order: number }>
+  >([]);
+  const [links, setLinks] = useState<Array<{ url: string; label: string }>>([]);
+
   const {
     register,
     handleSubmit,
     control,
-    watch,
     setValue,
     formState: { errors },
   } = useForm<UpdateContentFormData>({
     resolver: zodResolver(updateContentSchema),
   });
-
-  const watchStatus = watch("status");
 
   // Fetch content to edit
   useEffect(() => {
@@ -83,12 +117,32 @@ export default function EditContentPage() {
           // Set form values
           setValue("title", data.title);
           setValue("type", data.type);
-          setValue("status", data.status);
+          setValue("subtitle", data.subtitle);
           setValue("summary", data.summary);
           setValue("content", data.content);
-          setValue("featuredImage", data.featuredImage);
-          setValue("categoryId", data.categoryId);
-          setValue("priority", data.priority);
+          setValue("categoryId", data.categoryId || "");
+          setValue("isActive", data.isActive);
+          setValue("order", data.order || 0);
+          setValue("startDate", toDatetimeLocal(data.startDate));
+          setValue("endDate", toDatetimeLocal(data.endDate));
+
+          // Set media arrays
+          if (data.images && data.images.length > 0) {
+            setImages(data.images);
+          }
+          if (data.videos && data.videos.length > 0) {
+            setVideos(data.videos);
+          }
+          if (data.links && data.links.length > 0) {
+            setLinks(data.links);
+          }
+
+          // Set metadata
+          if (data.metadata) {
+            setValue("metadata.seoTitle", data.metadata.seoTitle);
+            setValue("metadata.seoDescription", data.metadata.seoDescription);
+            setValue("metadata.sponsor", data.metadata.sponsor);
+          }
         } else {
           setError(response.error || "Failed to load content");
         }
@@ -128,6 +182,9 @@ export default function EditContentPage() {
     try {
       const response = await cmsApi.content.update(contentId, {
         ...data,
+        images,
+        videos,
+        links,
         tagIds: selectedTagIds,
       });
 
@@ -143,6 +200,7 @@ export default function EditContentPage() {
     }
   };
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -154,6 +212,7 @@ export default function EditContentPage() {
     );
   }
 
+  // Not found state
   if (!content) {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
@@ -218,55 +277,43 @@ export default function EditContentPage() {
           <Input
             label="Title *"
             placeholder="Enter content title"
-            error={errors.title?.message}
+            error={
+              typeof errors.title?.message === "string"
+                ? errors.title.message
+                : undefined
+            }
             {...register("title")}
           />
 
-          {/* Type and Status Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Content Type *
-              </label>
-              <select
-                {...register("type")}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              >
-                {CONTENT_TYPES.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-              {errors.type && (
-                <p className="text-red-600 text-sm mt-1">
-                  {errors.type.message}
-                </p>
-              )}
-            </div>
+          {/* Subtitle */}
+          <Input
+            label="Subtitle"
+            placeholder="Optional subtitle for the content"
+            {...register("subtitle")}
+          />
 
-            {/* Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status *
-              </label>
-              <select
-                {...register("status")}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              >
-                {STATUS_OPTIONS.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-              {errors.status && (
-                <p className="text-red-600 text-sm mt-1">
-                  {errors.status.message}
-                </p>
-              )}
-            </div>
+          {/* Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Content Type *
+            </label>
+            <select
+              {...register("type")}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              {CONTENT_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
+            </select>
+            {errors.type && (
+              <p className="text-red-600 text-sm mt-1">
+                {typeof errors.type?.message === "string"
+                  ? errors.type.message
+                  : "Invalid type"}
+              </p>
+            )}
           </div>
 
           {/* Summary */}
@@ -282,7 +329,9 @@ export default function EditContentPage() {
             />
             {errors.summary && (
               <p className="text-red-600 text-sm mt-1">
-                {errors.summary.message}
+                {typeof errors.summary?.message === "string"
+                  ? errors.summary.message
+                  : "Invalid summary"}
               </p>
             )}
           </div>
@@ -299,41 +348,193 @@ export default function EditContentPage() {
                 <RichTextEditor
                   value={field.value || ""}
                   onChange={field.onChange}
-                  error={errors.content?.message}
+                  error={
+                    typeof errors.content?.message === "string"
+                      ? errors.content.message
+                      : undefined
+                  }
                 />
               )}
             />
           </div>
 
-          {/* Featured Image */}
+          {/* Images */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Featured Image URL
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Images
             </label>
-            <Input
-              placeholder="https://example.com/image.jpg"
-              {...register("featuredImage")}
+            <div className="space-y-3 mb-3">
+              {images.map((image, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-start justify-between gap-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {image.url}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Alt Text: {image.altText || "Not set"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setImages((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                    className="p-1 hover:bg-red-100 text-red-600 rounded transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <Controller
+              name="images"
+              control={control}
+              render={({ field }) => (
+                <MediaUpload
+                  value={images.map((img) => img.url)}
+                  onChange={(urls) => {
+                    const urlArray = Array.isArray(urls) ? urls : [urls];
+                    const newImages = urlArray.map((url, idx) => ({
+                      url,
+                      altText: "",
+                      order: images.length + idx,
+                    }));
+                    setImages((prev) => [...prev, ...newImages]);
+                  }}
+                  accept="image/*"
+                  maxSize={5}
+                  placeholder="Drop images here or click to upload"
+                  onUpload={handleMediaUpload}
+                />
+              )}
             />
-            {errors.featuredImage && (
-              <p className="text-red-600 text-sm mt-1">
-                {errors.featuredImage.message}
-              </p>
-            )}
           </div>
 
-          {/* Media Upload */}
+          {/* Videos */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Additional Media
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Videos
             </label>
-            <MediaUpload
-              value={watch("mediaUrls") || []}
-              onChange={(value) =>
-                setValue("mediaUrls", Array.isArray(value) ? value : [value])
-              }
-              onUpload={handleMediaUpload}
-              multiple
+            <div className="space-y-3 mb-3">
+              {videos.map((video, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-start justify-between gap-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {video.url}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Title: {video.title || "Not set"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVideos((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                    className="p-1 hover:bg-red-100 text-red-600 rounded transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <Controller
+              name="videos"
+              control={control}
+              render={({ field }) => (
+                <MediaUpload
+                  value={videos.map((vid) => vid.url)}
+                  onChange={(urls) => {
+                    const urlArray = Array.isArray(urls) ? urls : [urls];
+                    const newVideos = urlArray.map((url, idx) => ({
+                      url,
+                      title: "",
+                      order: videos.length + idx,
+                    }));
+                    setVideos((prev) => [...prev, ...newVideos]);
+                  }}
+                  accept="video/*"
+                  maxSize={100}
+                  placeholder="Drop videos here or click to upload"
+                  onUpload={handleMediaUpload}
+                />
+              )}
             />
+          </div>
+
+          {/* Links */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Links
+            </label>
+            <div className="space-y-3 mb-3">
+              {links.map((link, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-start justify-between gap-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {link.label || link.url}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 truncate">
+                      {link.url}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLinks((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                    className="p-1 hover:bg-red-100 text-red-600 rounded transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+              <input
+                type="text"
+                id="newLinkUrl"
+                placeholder="Link URL"
+                className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <input
+                type="text"
+                id="newLinkLabel"
+                placeholder="Link Label"
+                className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const urlInput = document.getElementById(
+                  "newLinkUrl"
+                ) as HTMLInputElement | null;
+                const labelInput = document.getElementById(
+                  "newLinkLabel"
+                ) as HTMLInputElement | null;
+                if (urlInput?.value && labelInput?.value) {
+                  setLinks((prev) => [
+                    ...prev,
+                    { url: urlInput.value, label: labelInput.value },
+                  ]);
+                  urlInput.value = "";
+                  labelInput.value = "";
+                }
+              }}
+              className="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-700 hover:border-blue-500 transition-colors text-sm font-medium"
+            >
+              Add Link
+            </button>
           </div>
         </div>
 
@@ -395,56 +596,127 @@ export default function EditContentPage() {
             Settings
           </h2>
 
-          {/* Priority */}
+          {/* Order */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Priority (0-100)
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Order
             </label>
-            <div className="flex items-center gap-4">
+            <input
+              type="number"
+              {...register("order", { valueAsNumber: true })}
+              min={0}
+              className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.order && (
+              <p className="mt-1 text-sm text-red-600">
+                {typeof errors.order?.message === "string"
+                  ? errors.order.message
+                  : "Invalid order"}
+              </p>
+            )}
+          </div>
+
+          {/* Date Range */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Start Date
+              </label>
               <input
-                type="range"
-                {...register("priority", { valueAsNumber: true })}
-                min="0"
-                max="100"
-                className="flex-1"
+                type="datetime-local"
+                {...register("startDate")}
+                className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {errors.startDate && (
+                <p className="mt-1 text-sm text-red-600">
+                  {typeof errors.startDate?.message === "string"
+                    ? errors.startDate.message
+                    : "Invalid start date"}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                End Date
+              </label>
               <input
-                type="number"
-                {...register("priority", { valueAsNumber: true })}
-                min="0"
-                max="100"
-                className="w-16 px-3 py-2 border border-gray-300 rounded-lg text-center"
+                type="datetime-local"
+                {...register("endDate")}
+                className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {errors.endDate && (
+                <p className="mt-1 text-sm text-red-600">
+                  {typeof errors.endDate?.message === "string"
+                    ? errors.endDate.message
+                    : "Invalid end date"}
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Scheduled Publish */}
-          {watchStatus === "SCHEDULED" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Schedule For *
-              </label>
-              <Input
-                type="datetime-local"
-                {...register("scheduledAt")}
-                error={errors.scheduledAt?.message}
-              />
-            </div>
-          )}
+          {/* Active Toggle */}
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="isActive"
+              {...register("isActive")}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label
+              htmlFor="isActive"
+              className="text-sm font-medium text-gray-700"
+            >
+              Active (visible to users)
+            </label>
+          </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="flex gap-3 justify-end">
+        {/* SEO & Metadata Card */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+          <h2 className="text-lg font-semibold text-gray-900 pb-4 border-b border-gray-200">
+            SEO Settings & Metadata
+          </h2>
+
+          <Input
+            label="SEO Title"
+            placeholder="SEO optimized title (max 70 characters)"
+            maxLength={70}
+            {...register("metadata.seoTitle")}
+          />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              SEO Description
+            </label>
+            <textarea
+              {...register("metadata.seoDescription")}
+              placeholder="Meta description (max 160 characters)"
+              maxLength={160}
+              rows={3}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+          </div>
+
+          <Input
+            label="Sponsor"
+            placeholder="Optional sponsor name"
+            {...register("metadata.sponsor")}
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-end gap-3 pt-4">
           <Link
             href={`/dashboard/cms/content/${contentId}`}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>

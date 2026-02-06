@@ -8,18 +8,16 @@ import React, { useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 
 import Input from "@/components/ui/Input";
-import { cmsApi } from "@/features/cms/api/cmsApi";
+import { cmsApi } from "@/features/cms/api";
 import {
   RichTextEditor,
   MediaUpload,
   TagBadge,
 } from "@/features/cms/components";
 import { useCategories, useTags } from "@/features/cms/hooks";
-import {
-  createContentSchema,
-  type CreateContentFormData,
-} from "@/features/cms/schemas";
-import type { ContentType, ContentStatus } from "@/features/cms/types";
+import { createContentSchema } from "@/features/cms/schemas";
+import type { ContentType } from "@/features/cms/types";
+import type { IUploadProgress } from "@/features/cms/utils/chunkedUpload";
 
 // Content type options
 const CONTENT_TYPES: {
@@ -57,18 +55,17 @@ const CONTENT_TYPES: {
   },
 ];
 
-// Status options
-const STATUS_OPTIONS: { value: ContentStatus; label: string }[] = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "PUBLISHED", label: "Published" },
-  { value: "SCHEDULED", label: "Scheduled" },
-];
-
 export default function NewContentPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<IUploadProgress | null>(
+    null
+  );
+
+  /** Raw image File objects to be sent with content creation */
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const { categories, isLoading: isCategoriesLoading } = useCategories();
   const { tags, isLoading: isTagsLoading } = useTags();
@@ -77,31 +74,47 @@ export default function NewContentPage() {
     register,
     handleSubmit,
     control,
-    watch,
     formState: { errors },
-  } = useForm<CreateContentFormData>({
+  } = useForm({
     resolver: zodResolver(createContentSchema),
     defaultValues: {
-      type: "BLOG",
-      status: "DRAFT",
+      type: "BANNER" as const,
       content: "",
-      priority: 0,
       isActive: true,
+      order: 0,
+      images: [],
+      videos: [],
+      links: [],
+      metadata: { sponsor: "" },
     },
-  });
+  } as any);
 
-  const watchStatus = watch("status");
+  const [images, setImages] = useState<
+    Array<{ url: string; altText: string; order: number }>
+  >([]);
+  const [videos, setVideos] = useState<
+    Array<{ url: string; title: string; order: number }>
+  >([]);
+  const [links, setLinks] = useState<Array<{ url: string; label: string }>>([]);
 
   // Handle form submission
-  const onSubmit = async (data: CreateContentFormData) => {
+  const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     setSubmitError(null);
+    setUploadProgress(null);
 
     try {
-      const response = await cmsApi.content.create({
-        ...data,
-        tagIds: selectedTagIds,
-      });
+      const response = await cmsApi.content.create(
+        {
+          ...data,
+          images,
+          videos,
+          links,
+          tagIds: selectedTagIds,
+        },
+        imageFiles.length > 0 ? imageFiles : undefined,
+        (progress) => setUploadProgress(progress)
+      );
 
       if (response.success && response.data) {
         router.push(`/dashboard/cms/content/${response.data.id}`);
@@ -112,6 +125,7 @@ export default function NewContentPage() {
       setSubmitError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(null);
     }
   };
 
@@ -124,13 +138,12 @@ export default function NewContentPage() {
     );
   }, []);
 
-  // Handle media upload
+  // Handle media upload — store raw files for chunked upload with content
   const handleMediaUpload = useCallback(async (files: File[]) => {
-    const response = await cmsApi.media.uploadMultiple(files);
-    if (response.success && response.data) {
-      return response.data.urls;
-    }
-    throw new Error("Upload failed");
+    // Store the raw files for submission with the content payload
+    setImageFiles((prev) => [...prev, ...files]);
+    // Return local preview URLs so the UI can show thumbnails immediately
+    return files.map((file) => URL.createObjectURL(file));
   }, []);
 
   return (
@@ -169,7 +182,7 @@ export default function NewContentPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
         {/* Main Content Card */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
           <h2 className="text-lg font-semibold text-gray-900 pb-4 border-b border-gray-200">
@@ -180,70 +193,42 @@ export default function NewContentPage() {
           <Input
             label="Title *"
             placeholder="Enter content title"
-            error={errors.title?.message}
+            error={
+              typeof errors.title?.message === "string"
+                ? errors.title.message
+                : undefined
+            }
             {...register("title")}
           />
 
-          {/* Type and Status Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Content Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Content Type *
-              </label>
-              <select
-                {...register("type")}
-                className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {CONTENT_TYPES.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label} - {type.description}
-                  </option>
-                ))}
-              </select>
-              {errors.type && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.type.message}
-                </p>
-              )}
-            </div>
+          {/* Subtitle */}
+          <Input
+            label="Subtitle"
+            placeholder="Optional subtitle for the content"
+            {...register("subtitle")}
+          />
 
-            {/* Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Status
-              </label>
-              <select
-                {...register("status")}
-                className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {STATUS_OPTIONS.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Content Type *
+            </label>
+            <select
+              {...register("type")}
+              className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {CONTENT_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label} - {type.description}
+                </option>
+              ))}
+            </select>
+            {errors.type && (
+              <p className="mt-1 text-sm text-red-600">
+                {(errors.type?.message as any) || "Invalid type"}
+              </p>
+            )}
           </div>
-
-          {/* Scheduled Date (show only when status is SCHEDULED) */}
-          {watchStatus === "SCHEDULED" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Scheduled Date *
-              </label>
-              <input
-                type="datetime-local"
-                {...register("scheduledAt")}
-                className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {errors.scheduledAt && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.scheduledAt.message}
-                </p>
-              )}
-            </div>
-          )}
 
           {/* Summary */}
           <div>
@@ -258,7 +243,9 @@ export default function NewContentPage() {
             />
             {errors.summary && (
               <p className="mt-1 text-sm text-red-600">
-                {errors.summary.message}
+                {typeof errors.summary?.message === "string"
+                  ? errors.summary.message
+                  : "Invalid summary"}
               </p>
             )}
           </div>
@@ -273,7 +260,11 @@ export default function NewContentPage() {
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Write your content here..."
-                error={errors.content?.message}
+                error={
+                  typeof errors.content?.message === "string"
+                    ? errors.content.message
+                    : undefined
+                }
                 minHeight={300}
               />
             )}
@@ -286,59 +277,183 @@ export default function NewContentPage() {
             Media
           </h2>
 
-          {/* Featured Image */}
+          {/* Images */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Featured Image
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Images
             </label>
+            <div className="space-y-3 mb-3">
+              {images.map((image, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-start justify-between gap-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {image.url}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Alt: {image.altText || "Not set"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setImages((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                    className="p-1 hover:bg-red-100 text-red-600 rounded transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
             <Controller
-              name="featuredImage"
+              name="images"
               control={control}
               render={({ field }) => (
                 <MediaUpload
-                  value={field.value}
-                  onChange={(url) =>
-                    field.onChange(Array.isArray(url) ? url[0] : url)
-                  }
+                  value={images.map((img) => img.url)}
+                  onChange={(urls) => {
+                    const urlArray = Array.isArray(urls) ? urls : [urls];
+                    const newImages = urlArray.map((url, idx) => ({
+                      url,
+                      altText: "",
+                      order: images.length + idx,
+                    }));
+                    setImages((prev) => [...prev, ...newImages]);
+                  }}
                   accept="image/*"
                   maxSize={5}
-                  placeholder="Drop an image here or click to upload"
-                  onUpload={async (files) => {
-                    const urls = await handleMediaUpload(files);
-                    return urls;
-                  }}
+                  placeholder="Drop images here or click to upload"
+                  onUpload={handleMediaUpload}
                 />
               )}
             />
           </div>
 
-          {/* Additional Media */}
+          {/* Videos */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Additional Media
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Videos
             </label>
+            <div className="space-y-3 mb-3">
+              {videos.map((video, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-start justify-between gap-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {video.url}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Title: {video.title || "Not set"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVideos((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                    className="p-1 hover:bg-red-100 text-red-600 rounded transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
             <Controller
-              name="mediaUrls"
+              name="videos"
               control={control}
               render={({ field }) => (
                 <MediaUpload
-                  value={field.value || []}
-                  onChange={(urls) => field.onChange(urls)}
-                  multiple
-                  maxFiles={10}
-                  accept="image/*,video/*"
-                  placeholder="Drop files here or click to upload"
+                  value={videos.map((vid) => vid.url)}
+                  onChange={(urls) => {
+                    const urlArray = Array.isArray(urls) ? urls : [urls];
+                    const newVideos = urlArray.map((url, idx) => ({
+                      url,
+                      title: "",
+                      order: videos.length + idx,
+                    }));
+                    setVideos((prev) => [...prev, ...newVideos]);
+                  }}
+                  accept="video/*"
+                  maxSize={100}
+                  placeholder="Drop videos here or click to upload"
                   onUpload={handleMediaUpload}
                 />
               )}
             />
+          </div>
+
+          {/* Links */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Links
+            </label>
+            <div className="space-y-3 mb-3">
+              {links.map((link, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 bg-gray-50 rounded-lg border border-gray-200 flex items-start justify-between gap-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {link.label || link.url}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 truncate">
+                      {link.url}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLinks((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                    className="p-1 hover:bg-red-100 text-red-600 rounded transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <Input
+                placeholder="Link URL"
+                id={`link-url-new`}
+                value=""
+                onChange={(e) => {
+                  // To be implemented with a proper form state
+                }}
+              />
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Link Label (optional)"
+                  id={`link-label-new`}
+                  value=""
+                  onChange={(e) => {
+                    // To be implemented with a proper form state
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    // To be implemented
+                  }}
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Organization Card */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
           <h2 className="text-lg font-semibold text-gray-900 pb-4 border-b border-gray-200">
-            Organization
+            Organization & Scheduling
           </h2>
 
           {/* Category */}
@@ -400,35 +515,62 @@ export default function NewContentPage() {
             </p>
           </div>
 
-          {/* Priority */}
+          {/* Order */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Order
+            </label>
+            <input
+              type="number"
+              {...register("order", { valueAsNumber: true })}
+              min={0}
+              className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.order && (
+              <p className="mt-1 text-sm text-red-600">
+                {typeof errors.order?.message === "string"
+                  ? errors.order.message
+                  : "Invalid order"}
+              </p>
+            )}
+          </div>
+
+          {/* Date Range */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Priority (0-100)
+                Start Date
               </label>
               <input
-                type="number"
-                {...register("priority", { valueAsNumber: true })}
-                min={0}
-                max={100}
+                type="datetime-local"
+                {...register("startDate")}
                 className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              {errors.priority && (
+              {errors.startDate && (
                 <p className="mt-1 text-sm text-red-600">
-                  {errors.priority.message}
+                  {typeof errors.startDate?.message === "string"
+                    ? errors.startDate.message
+                    : "Invalid start date"}
                 </p>
               )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Expiration Date
+                End Date
               </label>
               <input
                 type="datetime-local"
-                {...register("expiresAt")}
+                {...register("endDate")}
                 className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {errors.endDate && (
+                <p className="mt-1 text-sm text-red-600">
+                  {typeof errors.endDate?.message === "string"
+                    ? errors.endDate.message
+                    : "Invalid end date"}
+                </p>
+              )}
             </div>
           </div>
 
@@ -449,10 +591,10 @@ export default function NewContentPage() {
           </div>
         </div>
 
-        {/* SEO Card */}
+        {/* SEO & Metadata Card */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
           <h2 className="text-lg font-semibold text-gray-900 pb-4 border-b border-gray-200">
-            SEO Settings
+            SEO Settings & Metadata
           </h2>
 
           <Input
@@ -474,33 +616,65 @@ export default function NewContentPage() {
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
           </div>
+
+          <Input
+            label="Sponsor"
+            placeholder="Optional sponsor name"
+            {...register("metadata.sponsor")}
+          />
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4">
-          <Link
-            href="/dashboard/cms/content"
-            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-          >
-            Cancel
-          </Link>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                Create Content
-              </>
-            )}
-          </button>
+        <div className="flex flex-col gap-3 pt-4">
+          {/* Upload Progress */}
+          {uploadProgress && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-blue-700">
+                  Uploading {uploadProgress.fileName}
+                </p>
+                <span className="text-sm text-blue-600">
+                  {uploadProgress.percent}%
+                </span>
+              </div>
+              <div className="w-full bg-blue-100 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress.percent}%` }}
+                />
+              </div>
+              <p className="text-xs text-blue-500 mt-1">
+                Chunk {uploadProgress.currentChunk} of{" "}
+                {uploadProgress.totalChunks}
+              </p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-3">
+            <Link
+              href="/dashboard/cms/content"
+              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Create Content
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </form>
     </div>

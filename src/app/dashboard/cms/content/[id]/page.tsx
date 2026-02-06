@@ -7,8 +7,6 @@ import {
   Copy,
   Share2,
   Clock,
-  Eye,
-  User,
   FolderOpen,
   Tag,
   Calendar,
@@ -22,8 +20,11 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
-import { cmsApi } from "@/features/cms/api/cmsApi";
-import { StatusBadge, TypeBadge, TagBadge } from "@/features/cms/components";
+import { ContentDeleteDialog } from "../_components";
+
+import Modal from "@/components/ui/Modal";
+import { cmsApi } from "@/features/cms/api";
+import { TypeBadge, TagBadge } from "@/features/cms/components";
 import type { IMarketingContent } from "@/features/cms/types";
 
 export default function ContentDetailsPage() {
@@ -91,15 +92,15 @@ export default function ContentDetailsPage() {
     }
   };
 
-  // Handle publish
-  const handlePublish = async () => {
+  // Handle publish/activate
+  const handleActivate = async (id: string) => {
     setIsActionLoading(true);
     try {
-      const response = await cmsApi.content.publish(contentId);
+      const response = await cmsApi.content.update(id, { isActive: true });
       if (response.success && response.data) {
         setContent(response.data);
       } else {
-        setError(response.error || "Failed to publish content");
+        setError(response.error || "Failed to activate content");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -108,15 +109,15 @@ export default function ContentDetailsPage() {
     }
   };
 
-  // Handle archive
-  const handleArchive = async () => {
+  // Handle archive/deactivate
+  const handleArchive = async (id: string) => {
     setIsActionLoading(true);
     try {
-      const response = await cmsApi.content.archive(contentId);
+      const response = await cmsApi.content.archive(id);
       if (response.success && response.data) {
         setContent(response.data);
       } else {
-        setError(response.error || "Failed to archive content");
+        setError(response.error || "Failed to deactivate content");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -202,9 +203,8 @@ export default function ContentDetailsPage() {
           Back to Content
         </Link>
 
-        {/* Status Indicator */}
+        {/* Type Indicator */}
         <div className="flex items-center gap-2">
-          <StatusBadge status={content.status} />
           <TypeBadge type={content.type} />
         </div>
       </div>
@@ -234,27 +234,7 @@ export default function ContentDetailsPage() {
             <h1 className="text-3xl font-bold text-gray-900">
               {content.title}
             </h1>
-            <p className="text-gray-500 text-sm mt-2">
-              Slug:{" "}
-              <code className="bg-gray-100 px-2 py-1 rounded">
-                {content.slug}
-              </code>
-            </p>
           </div>
-
-          {/* Featured Image */}
-          {content.featuredImage && (
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="aspect-video bg-gray-100 relative">
-                <Image
-                  src={content.featuredImage}
-                  alt={content.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          )}
 
           {/* Summary */}
           {content.summary && (
@@ -278,25 +258,37 @@ export default function ContentDetailsPage() {
           </div>
 
           {/* Media */}
-          {content.mediaUrls && content.mediaUrls.length > 0 && (
+          {content.images && content.images.length > 0 && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-sm font-semibold text-gray-700 mb-4">
-                Media
+                Images
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {content.mediaUrls.map((url, index) => (
-                  <div
-                    key={index}
-                    className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative"
-                  >
-                    <Image
-                      src={url}
-                      alt={`Media ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
+                {content.images.map((image, index) => {
+                  const isValid =
+                    image.url.startsWith("http://") ||
+                    image.url.startsWith("https://") ||
+                    image.url.startsWith("/");
+                  return (
+                    <div
+                      key={index}
+                      className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative"
+                    >
+                      {isValid ? (
+                        <Image
+                          src={image.url}
+                          alt={image.altText || `Image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                          Invalid image URL
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -380,26 +372,11 @@ export default function ContentDetailsPage() {
               Edit Content
             </Link>
 
-            {/* Status Actions */}
+            {/* Active Status Actions */}
             <div className="space-y-2 pt-4 border-t border-gray-200">
-              {content.status !== "PUBLISHED" && (
+              {content.isActive ? (
                 <button
-                  onClick={handlePublish}
-                  disabled={isActionLoading}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-                >
-                  {isActionLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <CheckCircle className="h-4 w-4" />
-                  )}
-                  Publish
-                </button>
-              )}
-
-              {content.status !== "ARCHIVED" && (
-                <button
-                  onClick={handleArchive}
+                  onClick={() => handleArchive(content.id)}
                   disabled={isActionLoading}
                   className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
                 >
@@ -408,42 +385,55 @@ export default function ContentDetailsPage() {
                   ) : (
                     <Archive className="h-4 w-4" />
                   )}
-                  Archive
+                  Deactivate
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleActivate(content.id)}
+                  disabled={isActionLoading}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  {isActionLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4" />
+                  )}
+                  Activate
                 </button>
               )}
             </div>
+          </div>
 
-            {/* Other Actions */}
-            <div className="space-y-2 pt-4 border-t border-gray-200">
-              <button
-                onClick={handleDuplicate}
-                disabled={isActionLoading}
-                className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                {isActionLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-                Duplicate
-              </button>
+          {/* Other Actions */}
+          <div className="space-y-2 pt-4 border-t border-gray-200">
+            <button
+              onClick={handleDuplicate}
+              disabled={isActionLoading}
+              className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              {isActionLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+              Duplicate
+            </button>
 
-              <button className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                <Share2 className="h-4 w-4" />
-                Share
-              </button>
-            </div>
+            <button className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+              <Share2 className="h-4 w-4" />
+              Share
+            </button>
+          </div>
 
-            {/* Delete Button */}
-            <div className="pt-4 border-t border-gray-200">
-              <button
-                onClick={() => setIsDeleteConfirmOpen(true)}
-                className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete Content
-              </button>
-            </div>
+          {/* Delete Button */}
+          <div className="pt-4 border-t border-gray-200">
+            <button
+              onClick={() => setIsDeleteConfirmOpen(true)}
+              className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete Content
+            </button>
           </div>
 
           {/* Info Card */}
@@ -452,36 +442,9 @@ export default function ContentDetailsPage() {
               Information
             </h3>
 
-            {/* View Count */}
-            <div>
-              <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                <Eye className="h-4 w-4" />
-                <span>Views</span>
-              </div>
-              <p className="text-2xl font-bold text-gray-900">
-                {content.viewCount}
-              </p>
-            </div>
-
-            {/* Priority */}
-            <div className="pt-4 border-t border-gray-200">
-              <p className="text-xs font-medium text-gray-600 mb-2">Priority</p>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: `${content.priority}%` }}
-                  />
-                </div>
-                <span className="text-sm font-semibold text-gray-900">
-                  {content.priority}
-                </span>
-              </div>
-            </div>
-
             {/* Category */}
             {content.category && (
-              <div className="pt-4 border-t border-gray-200">
+              <div>
                 <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
                   <FolderOpen className="h-4 w-4" />
                   <span>Category</span>
@@ -494,7 +457,11 @@ export default function ContentDetailsPage() {
 
             {/* Tags */}
             {content.tags && content.tags.length > 0 && (
-              <div className="pt-4 border-t border-gray-200">
+              <div
+                className={
+                  content.category ? "pt-4 border-t border-gray-200" : ""
+                }
+              >
                 <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
                   <Tag className="h-4 w-4" />
                   <span>Tags</span>
@@ -504,104 +471,58 @@ export default function ContentDetailsPage() {
                     <TagBadge key={tag.id} name={tag.name} color={tag.color} />
                   ))}
                 </div>
-
-                {/* Author */}
-                <div className="space-y-2 pt-4 border-t border-gray-200">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <User className="h-4 w-4" />
-                    <span>Author</span>
-                  </div>
-                  <div>
-                    <p className="text-gray-900 font-medium">
-                      {content.author?.name || "Unknown"}
-                    </p>
-                    <p className="text-gray-500 text-sm">
-                      {content.author?.email || "N/A"}
-                    </p>
-                  </div>
-                </div>
               </div>
             )}
+          </div>
 
-            {/* Dates */}
-            <div className="pt-4 border-t border-gray-200 space-y-3">
-              <div>
-                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>Created</span>
-                </div>
-                <p className="text-gray-900 text-sm">
-                  {formatDate(content.createdAt)}
-                </p>
+          {/* Dates */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
+            <h3 className="text-sm font-semibold text-gray-700 mb-4">Dates</h3>
+            <div>
+              <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                <Calendar className="h-4 w-4" />
+                <span>Created</span>
               </div>
+              <p className="text-gray-900 text-sm">
+                {formatDate(content.createdAt)}
+              </p>
+            </div>
 
-              <div>
-                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                  <Clock className="h-4 w-4" />
-                  <span>Last Updated</span>
-                </div>
-                <p className="text-gray-900 text-sm">
-                  {formatDate(content.updatedAt)}
-                </p>
+            <div>
+              <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                <Clock className="h-4 w-4" />
+                <span>Last Updated</span>
               </div>
-
-              {content.publishedAt && (
-                <div>
-                  <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Published</span>
-                  </div>
-                  <p className="text-gray-900 text-sm">
-                    {formatDate(content.publishedAt)}
-                  </p>
-                </div>
-              )}
-
-              {content.scheduledAt && (
-                <div>
-                  <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                    <Clock className="h-4 w-4" />
-                    <span>Scheduled For</span>
-                  </div>
-                  <p className="text-gray-900 text-sm">
-                    {formatDate(content.scheduledAt)}
-                  </p>
-                </div>
-              )}
+              <p className="text-gray-900 text-sm">
+                {formatDate(content.updatedAt)}
+              </p>
             </div>
           </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          isOpen={isDeleteConfirmOpen}
+          onClose={() => {
+            if (!isDeleting) {
+              setIsDeleteConfirmOpen(false);
+            }
+          }}
+          title=""
+          size="sm"
+          showCloseButton={false}
+          backdropClassName="bg-black/60 backdrop-blur-sm"
+        >
+          {content && (
+            <ContentDeleteDialog
+              content={content}
+              onConfirm={handleDelete}
+              onCancel={() => setIsDeleteConfirmOpen(false)}
+              isDeleting={isDeleting}
+            />
+          )}
+        </Modal>
       </div>
-
-      {/* Delete Confirmation Dialog */}
-      {isDeleteConfirmOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Delete Content?
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete &ldquo;{content.title}&rdquo;?
-              This action cannot be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setIsDeleteConfirmOpen(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {isDeleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

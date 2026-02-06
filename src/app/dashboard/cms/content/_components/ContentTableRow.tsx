@@ -15,7 +15,7 @@ interface IContentTableRowProps {
   isMenuOpen: boolean;
   onSelect: () => void;
   onMenuToggle: () => void;
-  onPublish: (id: string) => void;
+  onActivate: (id: string) => void;
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
 }
@@ -26,7 +26,7 @@ export function ContentTableRow({
   isMenuOpen,
   onSelect,
   onMenuToggle,
-  onPublish,
+  onActivate,
   onArchive,
   onDelete,
 }: IContentTableRowProps) {
@@ -42,14 +42,27 @@ export function ContentTableRow({
       </td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-3">
-          {content.featuredImage ? (
-            <Image
-              src={content.featuredImage}
-              alt={content.title}
-              width={40}
-              height={40}
-              className="h-10 w-10 rounded object-cover"
-            />
+          {content.images && content.images.length > 0 ? (
+            (() => {
+              const imgUrl = content.images[0].url;
+              const isValidUrl =
+                imgUrl.startsWith("http://") ||
+                imgUrl.startsWith("https://") ||
+                imgUrl.startsWith("/");
+              return isValidUrl ? (
+                <Image
+                  src={imgUrl}
+                  alt={content.images[0].altText || content.title}
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded object-cover"
+                />
+              ) : (
+                <div className="h-10 w-10 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">
+                  IMG
+                </div>
+              );
+            })()
           ) : (
             <div className="h-10 w-10 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">
               No img
@@ -106,8 +119,8 @@ export function ContentTableRow({
           {isMenuOpen && (
             <ContentActionMenu
               contentId={content.id}
-              status={content.status}
-              onPublish={onPublish}
+              isActive={content.isActive}
+              onActivate={onActivate}
               onArchive={onArchive}
               onDelete={onDelete}
             />

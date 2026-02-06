@@ -58,7 +58,10 @@ export function RecentContentList({
           href={`/dashboard/cms/content/${content.id}`}
           className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
         >
-          {content.featuredImage ? (
+          {content.featuredImage &&
+          (content.featuredImage.startsWith("http://") ||
+            content.featuredImage.startsWith("https://") ||
+            content.featuredImage.startsWith("/")) ? (
             <Image
               src={content.featuredImage}
               alt={content.title}

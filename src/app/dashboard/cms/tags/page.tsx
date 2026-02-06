@@ -14,8 +14,8 @@ import {
 
 import Modal from "@/components/ui/Modal";
 import { useToast } from "@/context/ToastContext";
-import type { IContentTag } from "@/features/cms/types";
-import { tagStore } from "@/features/cms/utils";
+import { cmsApi } from "@/features/cms/api";
+import type { IContentTag, ICreateContentTag } from "@/features/cms/types";
 
 export default function TagsPage() {
   const toast = useToast();
@@ -26,23 +26,35 @@ export default function TagsPage() {
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [isActiveFilter, setIsActiveFilter] = useState<boolean | null>(null);
+
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingTag, setEditingTag] = useState<IContentTag | null>(null);
   const [deletingTag, setDeletingTag] = useState<IContentTag | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isFilterActive, setIsFilterActive] = useState<boolean | null>(null);
 
-  // Load tags (using mock data)
-  const loadTags = useCallback(() => {
+  // Load tags from API
+  const loadTags = useCallback(async () => {
     setIsLoading(true);
-    // Simulate API delay
-    setTimeout(() => {
-      setTags(tagStore.getAll());
+    try {
+      const response = await cmsApi.tags.getAll();
+      if (response.success && response.data) {
+        const items = Array.isArray(response.data) ? response.data : [];
+        setTags(items);
+      } else {
+        toast.error("Error", response.error || "Failed to load tags");
+      }
+    } catch (error) {
+      toast.error(
+        "Error",
+        error instanceof Error ? error.message : "Failed to load tags"
+      );
+    } finally {
       setIsLoading(false);
-    }, 300);
-  }, []);
+    }
+  }, [toast]);
 
   useEffect(() => {
     loadTags();
@@ -56,78 +68,90 @@ export default function TagsPage() {
       tag.slug.toLowerCase().includes(searchValue.toLowerCase());
 
     const isMatchingActive =
-      isFilterActive === null || tag.isActive === isFilterActive;
+      isActiveFilter === null || tag.isActive === isActiveFilter;
 
     return isMatchingSearch && isMatchingActive;
   });
 
   // Handle create/update
   const handleFormSubmit = useCallback(
-    (data: Partial<IContentTag>) => {
+    async (data: Partial<IContentTag>) => {
       setIsSubmitting(true);
 
-      // Simulate API delay
-      setTimeout(() => {
-        try {
-          if (editingTag) {
-            // Update existing
-            const updated = tagStore.update(editingTag.id, data);
-            if (updated) {
-              setTags((prev) =>
-                prev.map((t) => (t.id === updated.id ? updated : t))
-              );
-              toast.success(
-                "Tag Updated",
-                `"${updated.name}" has been updated successfully`
-              );
-            }
-          } else {
-            // Create new
-            const created = tagStore.create(
-              data as Omit<IContentTag, "id" | "createdAt" | "updatedAt">
+      try {
+        if (editingTag) {
+          // Update existing
+          const response = await cmsApi.tags.update(
+            editingTag.id,
+            data as Partial<ICreateContentTag>
+          );
+          if (response.success && response.data) {
+            setTags((prev) =>
+              prev.map((t) => (t.id === response.data!.id ? response.data! : t))
             );
-            setTags((prev) => [...prev, created]);
+            toast.success(
+              "Tag Updated",
+              `"${response.data.name}" has been updated successfully`
+            );
+          } else {
+            toast.error("Error", response.error || "Failed to update tag");
+          }
+        } else {
+          // Create new
+          const response = await cmsApi.tags.create(data as ICreateContentTag);
+          if (response.success && response.data) {
+            setTags((prev) => [...prev, response.data!]);
             toast.success(
               "Tag Created",
-              `"${created.name}" has been created successfully`
+              `"${response.data.name}" has been created successfully`
             );
+          } else {
+            toast.error("Error", response.error || "Failed to create tag");
           }
-
-          setIsFormModalOpen(false);
-          setEditingTag(null);
-        } catch {
-          toast.error("Error", "An error occurred. Please try again.");
-        } finally {
-          setIsSubmitting(false);
         }
-      }, 500);
+
+        setIsFormModalOpen(false);
+        setEditingTag(null);
+      } catch (error) {
+        toast.error(
+          "Error",
+          error instanceof Error ? error.message : "An error occurred"
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
     },
     [editingTag, toast]
   );
 
   // Handle delete
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (!deletingTag) return;
 
     setIsSubmitting(true);
 
-    // Simulate API delay
-    setTimeout(() => {
-      const isSuccess = tagStore.delete(deletingTag.id);
-      if (isSuccess) {
+    try {
+      const response = await cmsApi.tags.delete(deletingTag.id);
+      if (response.success) {
         setTags((prev) => prev.filter((t) => t.id !== deletingTag.id));
         toast.success(
           "Tag Deleted",
           `"${deletingTag.name}" has been deleted successfully`
         );
       } else {
-        toast.error("Delete Failed", "Failed to delete tag");
+        toast.error("Delete Failed", response.error || "Failed to delete tag");
       }
 
       setIsDeleteModalOpen(false);
       setDeletingTag(null);
+    } catch (error) {
+      toast.error(
+        "Error",
+        error instanceof Error ? error.message : "Failed to delete tag"
+      );
+    } finally {
       setIsSubmitting(false);
-    }, 500);
+    }
   }, [deletingTag, toast]);
 
   // Open create modal
@@ -164,8 +188,6 @@ export default function TagsPage() {
     }
   }, [actionMenuOpen]);
 
-  const hasFilters = !!searchValue || isFilterActive !== null;
-
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -175,12 +197,12 @@ export default function TagsPage() {
         isLoading={isLoading}
       />
 
-      {/* Search and Filters */}
+      {/* Search Filter */}
       <TagSearchFilter
         searchValue={searchValue}
         onSearchChange={setSearchValue}
-        activeFilter={isFilterActive}
-        onActiveFilterChange={setIsFilterActive}
+        activeFilter={isActiveFilter}
+        onActiveFilterChange={setIsActiveFilter}
       />
 
       {/* Tags Grid */}
@@ -189,7 +211,7 @@ export default function TagsPage() {
           <TagGridSkeleton />
         ) : filteredTags.length === 0 ? (
           <TagEmptyState
-            hasFilters={hasFilters}
+            hasFilters={!!searchValue}
             onCreateClick={openCreateModal}
           />
         ) : (

@@ -3,12 +3,37 @@
  * Centralized HTTP client for making API requests
  */
 
+import { STORAGE_KEYS } from "@/lib/constants";
 import type { IApiResponse } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 interface IRequestOptions extends RequestInit {
   data?: any;
+}
+
+/**
+ * Get auth token from localStorage (client-side only)
+ */
+function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+}
+
+/**
+ * Set auth token in localStorage
+ */
+export function setAuthToken(token: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+}
+
+/**
+ * Remove auth token from localStorage
+ */
+export function removeAuthToken(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
 }
 
 class ApiClient {
@@ -24,16 +49,24 @@ class ApiClient {
   ): Promise<IApiResponse<T>> {
     const { data, headers, ...restOptions } = options;
 
+    // Get auth token and include in headers
+    const token = getAuthToken();
+
+    const isFormData =
+      typeof FormData !== "undefined" && data instanceof FormData;
+
     const config: RequestInit = {
       ...restOptions,
       headers: {
-        "Content-Type": "application/json",
+        // Don't set Content-Type for FormData — browser sets it with boundary
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
       },
     };
 
     if (data) {
-      config.body = JSON.stringify(data);
+      config.body = isFormData ? data : JSON.stringify(data);
     }
 
     try {
@@ -43,16 +76,24 @@ class ApiClient {
       if (!response.ok) {
         return {
           success: false,
-          error: result.error || "An error occurred",
+          error: result.message || result.error || "An error occurred",
         };
       }
 
+      // Normalize backend response:
+      // If the backend wraps in { data: ... }, extract it.
+      // Otherwise use the raw result as-is.
+      const payload = Object.hasOwn(result, "data") ? result.data : result;
+
       return {
         success: true,
-        data: result.data || result,
+        data: payload as T,
+        // Preserve pagination meta if present at the top level
+        ...(result.meta ? { meta: result.meta } : {}),
+        ...(result.total !== undefined ? { total: result.total } : {}),
       };
     } catch (error) {
-      console.log(
+      console.error(
         "API request failed:",
         error instanceof Error ? error.message : error
       );
