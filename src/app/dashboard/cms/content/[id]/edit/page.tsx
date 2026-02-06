@@ -33,7 +33,39 @@ import {
   updateContentSchema,
   type UpdateContentFormData,
 } from "@/features/cms/schemas";
-import type { ContentType, IMarketingContent } from "@/features/cms/types";
+import type {
+  ContentType,
+  ContentStatus,
+  IMarketingContent,
+} from "@/features/cms/types";
+
+// Content status options
+const STATUS_OPTIONS: {
+  value: ContentStatus;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "DRAFT",
+    label: "Draft",
+    description: "Save as draft, not visible to users",
+  },
+  {
+    value: "PUBLISHED",
+    label: "Published",
+    description: "Visible to users immediately",
+  },
+  {
+    value: "SCHEDULED",
+    label: "Scheduled",
+    description: "Will be published at scheduled date",
+  },
+  {
+    value: "ARCHIVED",
+    label: "Archived",
+    description: "Hidden from users, kept for records",
+  },
+];
 
 // Content type options
 const CONTENT_TYPES: {
@@ -46,18 +78,12 @@ const CONTENT_TYPES: {
     label: "Banner",
     description: "Homepage or section banners",
   },
-  { value: "HERO", label: "Hero", description: "Hero section content" },
-  {
-    value: "PROMOTION",
-    label: "Promotion",
-    description: "Promotional content",
-  },
+  { value: "NEWS", label: "News", description: "News articles and updates" },
   {
     value: "ANNOUNCEMENT",
     label: "Announcement",
     description: "Important announcements",
   },
-  { value: "BLOG", label: "Blog", description: "Blog posts and articles" },
   {
     value: "TESTIMONIAL",
     label: "Testimonial",
@@ -65,9 +91,25 @@ const CONTENT_TYPES: {
   },
   { value: "FAQ", label: "FAQ", description: "Frequently asked questions" },
   {
-    value: "FEATURE",
-    label: "Feature",
-    description: "Product/service features",
+    value: "GALLERY",
+    label: "Gallery",
+    description: "Image galleries",
+  },
+  { value: "VIDEO", label: "Video", description: "Video content" },
+  {
+    value: "TEXT_BLOCK",
+    label: "Text Block",
+    description: "Custom text blocks",
+  },
+  {
+    value: "CONTACT_INFO",
+    label: "Contact Info",
+    description: "Contact information",
+  },
+  {
+    value: "SOCIAL_LINKS",
+    label: "Social Links",
+    description: "Social media links",
   },
 ];
 
@@ -122,6 +164,7 @@ export default function EditContentPage() {
           setValue("content", data.content);
           setValue("categoryId", data.categoryId || "");
           setValue("isActive", data.isActive);
+          setValue("status", data.status || "DRAFT");
           setValue("order", data.order || 0);
           setValue("startDate", toDatetimeLocal(data.startDate));
           setValue("endDate", toDatetimeLocal(data.endDate));
@@ -669,6 +712,23 @@ export default function EditContentPage() {
             >
               Active (visible to users)
             </label>
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Status *
+            </label>
+            <select
+              {...register("status")}
+              className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label} — {option.description}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

@@ -56,21 +56,35 @@ const TYPE_STYLES: Record<
   { bg: string; text: string; label: string }
 > = {
   BANNER: { bg: "bg-purple-100", text: "text-purple-700", label: "Banner" },
-  HERO: { bg: "bg-indigo-100", text: "text-indigo-700", label: "Hero" },
-  PROMOTION: { bg: "bg-pink-100", text: "text-pink-700", label: "Promotion" },
+  NEWS: { bg: "bg-indigo-100", text: "text-indigo-700", label: "News" },
   ANNOUNCEMENT: {
     bg: "bg-orange-100",
     text: "text-orange-700",
     label: "Announcement",
   },
-  BLOG: { bg: "bg-teal-100", text: "text-teal-700", label: "Blog" },
   TESTIMONIAL: {
     bg: "bg-cyan-100",
     text: "text-cyan-700",
     label: "Testimonial",
   },
   FAQ: { bg: "bg-amber-100", text: "text-amber-700", label: "FAQ" },
-  FEATURE: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Feature" },
+  GALLERY: { bg: "bg-pink-100", text: "text-pink-700", label: "Gallery" },
+  VIDEO: { bg: "bg-teal-100", text: "text-teal-700", label: "Video" },
+  TEXT_BLOCK: {
+    bg: "bg-emerald-100",
+    text: "text-emerald-700",
+    label: "Text Block",
+  },
+  CONTACT_INFO: {
+    bg: "bg-blue-100",
+    text: "text-blue-700",
+    label: "Contact Info",
+  },
+  SOCIAL_LINKS: {
+    bg: "bg-violet-100",
+    text: "text-violet-700",
+    label: "Social Links",
+  },
 };
 
 const FALLBACK_TYPE_STYLE = {

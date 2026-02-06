@@ -1,13 +1,15 @@
 /**
  * Chunked File Upload Utility
  *
- * Converts files into base64-encoded chunks for transmission alongside
- * content creation/update payloads on the same endpoint.
+ * Converts image files into base64-encoded chunks and sends them as part of
+ * the JSON payload to the `/marketing-contents` endpoint — no separate media
+ * endpoint is needed.
  *
- * Why chunks?
- *  - Avoids request-size limits on large images/videos.
- *  - Allows progress tracking per chunk.
- *  - Resilient: individual failed chunks can be retried.
+ * Flow:
+ *  1. Each file is sliced into ≤ 512 KB binary chunks.
+ *  2. Each chunk is base64-encoded.
+ *  3. The chunks array is attached to the content JSON body under `imageChunks`.
+ *  4. The backend reassembles the chunks into the final image.
  */
 
 /** Default chunk size: 512 KB */
@@ -33,10 +35,6 @@ export interface IFileChunk {
   mimeType: string;
   /** Total file size in bytes */
   fileSize: number;
-  /** Byte offset where this chunk starts */
-  offset: number;
-  /** Size of this chunk in bytes (before base64 encoding) */
-  chunkSize: number;
 }
 
 export interface IChunkedFile {
@@ -106,11 +104,6 @@ function validateFile(file: File, maxSize = MAX_FILE_SIZE): void {
 
 /**
  * Split a single File into base64-encoded chunks.
- *
- * @param file       The File to chunk.
- * @param chunkSize  Bytes per chunk (default 512 KB).
- * @param onProgress Optional progress callback.
- * @returns          A `IChunkedFile` containing ordered chunks.
  */
 export async function chunkFile(
   file: File,
@@ -134,8 +127,6 @@ export async function chunkFile(
       fileName: file.name,
       mimeType: file.type || "application/octet-stream",
       fileSize: file.size,
-      offset,
-      chunkSize: slice.size,
     });
 
     onProgress?.({
@@ -156,11 +147,6 @@ export async function chunkFile(
 
 /**
  * Process multiple files into chunked representations.
- *
- * @param files      Array of Files.
- * @param chunkSize  Bytes per chunk (default 512 KB).
- * @param onProgress Optional per-file progress callback.
- * @returns          Array of `IChunkedFile`.
  */
 export async function chunkFiles(
   files: File[],
@@ -178,74 +164,34 @@ export async function chunkFiles(
 }
 
 /**
- * Build a FormData payload that includes content fields **and** image file
- * chunks suitable for the `/marketing-contents` endpoint.
+ * Convert image files to base64 chunk payloads ready to embed in a JSON body.
  *
- * The images are appended as individual `images` fields so the backend
- * receives them as a standard multipart file array. For files larger than
- * `chunkSize`, the file is split client-side but still sent as complete
- * binary blobs reconstructed from their base64 chunks.
- *
- * @param contentData  Plain-object content fields (title, type, etc.).
- * @param imageFiles   Raw image File objects to attach.
- * @param onProgress   Optional progress callback for chunk processing.
- * @returns            FormData ready to POST.
+ * Returns an array of objects, one per file, with the file's chunks.
+ * This can be sent as `imageChunks` inside the content creation JSON.
  */
-export async function buildContentFormData(
-  contentData: Record<string, unknown>,
+export async function prepareImageChunks(
   imageFiles: File[],
   onProgress?: ProgressCallback
-): Promise<FormData> {
-  const formData = new FormData();
-
-  // Append all scalar / JSON content fields
-  for (const [key, value] of Object.entries(contentData)) {
-    if (value === undefined || value === null) continue;
-
-    if (typeof value === "object" && !(value instanceof File)) {
-      formData.append(key, JSON.stringify(value));
-    } else {
-      formData.append(key, String(value));
-    }
-  }
-
-  // Process & append images as chunked binary
-  if (imageFiles.length > 0) {
-    const chunkedImages = await chunkFiles(
-      imageFiles,
-      DEFAULT_CHUNK_SIZE,
-      onProgress
-    );
-
-    for (const chunkedFile of chunkedImages) {
-      // Reassemble chunks back into a single Blob for clean multipart upload
-      const binaryChunks: BlobPart[] = [];
-      for (const chunk of chunkedFile.chunks) {
-        const binaryString = atob(chunk.data);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        binaryChunks.push(bytes.buffer as ArrayBuffer);
-      }
-
-      const blob = new Blob(binaryChunks, { type: chunkedFile.mimeType });
-      formData.append("images", blob, chunkedFile.fileName);
-    }
-  }
-
-  return formData;
+): Promise<IChunkedFile[]> {
+  return chunkFiles(imageFiles, DEFAULT_CHUNK_SIZE, onProgress);
 }
 
 /**
- * Convert a File to a base64 data-URI string.
- * Useful for small preview images that don't need chunking.
+ * Convert a File to a full base64 data-URI string.
  */
-export function fileToDataUri(file: File): Promise<string> {
+export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = () => reject(new Error("Failed to read file"));
     reader.readAsDataURL(file);
   });
+}
+
+/**
+ * Convert a File to a plain base64 string (no data-URI prefix).
+ */
+export async function fileToRawBase64(file: File): Promise<string> {
+  const dataUri = await fileToBase64(file);
+  return dataUri.split(",")[1] ?? "";
 }

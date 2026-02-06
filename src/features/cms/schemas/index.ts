@@ -8,13 +8,15 @@ import { z } from "zod/v4";
 // Content type enum
 export const contentTypeSchema = z.enum([
   "BANNER",
-  "HERO",
-  "PROMOTION",
+  "NEWS",
   "ANNOUNCEMENT",
-  "BLOG",
   "TESTIMONIAL",
   "FAQ",
-  "FEATURE",
+  "GALLERY",
+  "VIDEO",
+  "TEXT_BLOCK",
+  "CONTACT_INFO",
+  "SOCIAL_LINKS",
 ]);
 
 // Content status enum
@@ -114,6 +116,7 @@ export const createContentSchema = z
       .string()
       .max(500, "Summary must not exceed 500 characters")
       .optional(),
+    status: contentStatusSchema.default("DRAFT"),
     images: z.array(imageMediaSchema).default([]),
     videos: z.array(videoMediaSchema).default([]),
     links: z.array(linkSchema).default([]),
@@ -155,6 +158,7 @@ export const updateContentSchema = z.object({
     .string()
     .max(500, "Summary must not exceed 500 characters")
     .optional(),
+  status: contentStatusSchema.optional(),
   images: z.array(imageMediaSchema).optional(),
   videos: z.array(videoMediaSchema).optional(),
   links: z.array(linkSchema).optional(),

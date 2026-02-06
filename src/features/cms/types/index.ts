@@ -6,13 +6,15 @@
 // Enums matching Prisma schema
 export type ContentType =
   | "BANNER"
-  | "HERO"
-  | "PROMOTION"
+  | "NEWS"
   | "ANNOUNCEMENT"
-  | "BLOG"
   | "TESTIMONIAL"
   | "FAQ"
-  | "FEATURE";
+  | "GALLERY"
+  | "VIDEO"
+  | "TEXT_BLOCK"
+  | "CONTACT_INFO"
+  | "SOCIAL_LINKS";
 
 export type ContentStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED" | "SCHEDULED";
 

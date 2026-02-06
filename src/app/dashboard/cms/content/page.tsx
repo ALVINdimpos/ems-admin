@@ -28,13 +28,15 @@ import type {
 // Content type options for filter
 const CONTENT_TYPE_OPTIONS = [
   { label: "Banner", value: "BANNER" },
-  { label: "Hero", value: "HERO" },
-  { label: "Promotion", value: "PROMOTION" },
+  { label: "News", value: "NEWS" },
   { label: "Announcement", value: "ANNOUNCEMENT" },
-  { label: "Blog", value: "BLOG" },
   { label: "Testimonial", value: "TESTIMONIAL" },
   { label: "FAQ", value: "FAQ" },
-  { label: "Feature", value: "FEATURE" },
+  { label: "Gallery", value: "GALLERY" },
+  { label: "Video", value: "VIDEO" },
+  { label: "Text Block", value: "TEXT_BLOCK" },
+  { label: "Contact Info", value: "CONTACT_INFO" },
+  { label: "Social Links", value: "SOCIAL_LINKS" },
 ];
 
 // Status options for filter (maps to backend `isActive` boolean)

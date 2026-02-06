@@ -16,8 +16,41 @@ import {
 } from "@/features/cms/components";
 import { useCategories, useTags } from "@/features/cms/hooks";
 import { createContentSchema } from "@/features/cms/schemas";
-import type { ContentType } from "@/features/cms/types";
+import type { ContentType, ContentStatus } from "@/features/cms/types";
 import type { IUploadProgress } from "@/features/cms/utils/chunkedUpload";
+
+// Content status options
+const STATUS_OPTIONS: {
+  value: ContentStatus;
+  label: string;
+  description: string;
+  color: string;
+}[] = [
+  {
+    value: "DRAFT",
+    label: "Draft",
+    description: "Save as draft, not visible to users",
+    color: "text-gray-600",
+  },
+  {
+    value: "PUBLISHED",
+    label: "Published",
+    description: "Visible to users immediately",
+    color: "text-green-600",
+  },
+  {
+    value: "SCHEDULED",
+    label: "Scheduled",
+    description: "Will be published at scheduled date",
+    color: "text-blue-600",
+  },
+  {
+    value: "ARCHIVED",
+    label: "Archived",
+    description: "Hidden from users, kept for records",
+    color: "text-orange-600",
+  },
+];
 
 // Content type options
 const CONTENT_TYPES: {
@@ -30,18 +63,12 @@ const CONTENT_TYPES: {
     label: "Banner",
     description: "Homepage or section banners",
   },
-  { value: "HERO", label: "Hero", description: "Hero section content" },
-  {
-    value: "PROMOTION",
-    label: "Promotion",
-    description: "Promotional content",
-  },
+  { value: "NEWS", label: "News", description: "News articles and updates" },
   {
     value: "ANNOUNCEMENT",
     label: "Announcement",
     description: "Important announcements",
   },
-  { value: "BLOG", label: "Blog", description: "Blog posts and articles" },
   {
     value: "TESTIMONIAL",
     label: "Testimonial",
@@ -49,9 +76,25 @@ const CONTENT_TYPES: {
   },
   { value: "FAQ", label: "FAQ", description: "Frequently asked questions" },
   {
-    value: "FEATURE",
-    label: "Feature",
-    description: "Product/service features",
+    value: "GALLERY",
+    label: "Gallery",
+    description: "Image galleries",
+  },
+  { value: "VIDEO", label: "Video", description: "Video content" },
+  {
+    value: "TEXT_BLOCK",
+    label: "Text Block",
+    description: "Custom text blocks",
+  },
+  {
+    value: "CONTACT_INFO",
+    label: "Contact Info",
+    description: "Contact information",
+  },
+  {
+    value: "SOCIAL_LINKS",
+    label: "Social Links",
+    description: "Social media links",
   },
 ];
 
@@ -80,6 +123,7 @@ export default function NewContentPage() {
     defaultValues: {
       type: "BANNER" as const,
       content: "",
+      status: "DRAFT" as ContentStatus,
       isActive: true,
       order: 0,
       images: [],
@@ -588,6 +632,30 @@ export default function NewContentPage() {
             >
               Active (visible to users)
             </label>
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Status *
+            </label>
+            <select
+              {...register("status")}
+              className="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label} — {option.description}
+                </option>
+              ))}
+            </select>
+            {errors.status && (
+              <p className="mt-1 text-sm text-red-600">
+                {typeof errors.status?.message === "string"
+                  ? errors.status.message
+                  : "Invalid status"}
+              </p>
+            )}
           </div>
         </div>
 

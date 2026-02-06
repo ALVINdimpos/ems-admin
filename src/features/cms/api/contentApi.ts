@@ -14,7 +14,7 @@ import type {
   ContentStatus,
 } from "../types";
 import {
-  buildContentFormData,
+  prepareImageChunks,
   type ProgressCallback,
 } from "../utils/chunkedUpload";
 
@@ -109,35 +109,33 @@ export const contentApi = {
   /**
    * Create new marketing content.
    *
-   * When `imageFiles` are provided the request is sent as multipart/form-data
-   * with images chunked client-side for reliability. Otherwise a plain JSON
-   * POST is used.
+   * Always sends a JSON payload. When `imageFiles` are provided, each image
+   * is split into base64 chunks and included in the body as `imageChunks`
+   * so the backend can reassemble them.
    */
   create: async (
     data: ICreateMarketingContent,
     imageFiles?: File[],
     onUploadProgress?: ProgressCallback
   ): Promise<IApiResponse<IMarketingContent>> => {
-    // If no image files, send a simple JSON payload
-    if (!imageFiles || imageFiles.length === 0) {
-      return apiClient.post<IMarketingContent>(`/marketing-contents`, data);
+    let payload: Record<string, unknown> = { ...data };
+
+    // If image files exist, chunk them and attach as base64 in JSON
+    if (imageFiles && imageFiles.length > 0) {
+      const chunkedImages = await prepareImageChunks(
+        imageFiles,
+        onUploadProgress
+      );
+      payload = { ...payload, imageChunks: chunkedImages };
     }
 
-    // Build FormData with chunked images on the same endpoint
-    const formData = await buildContentFormData(
-      data as unknown as Record<string, unknown>,
-      imageFiles,
-      onUploadProgress
-    );
-
-    return apiClient.post<IMarketingContent>(`/marketing-contents`, formData);
+    return apiClient.post<IMarketingContent>(`/marketing-contents`, payload);
   },
 
   /**
    * Update existing content.
    *
-   * Supports optional image file uploads via chunked FormData, just like
-   * `create`.
+   * Like `create`, images are chunked and embedded in the JSON payload.
    */
   update: async (
     id: string,
@@ -145,22 +143,19 @@ export const contentApi = {
     imageFiles?: File[],
     onUploadProgress?: ProgressCallback
   ): Promise<IApiResponse<IMarketingContent>> => {
-    if (!imageFiles || imageFiles.length === 0) {
-      return apiClient.patch<IMarketingContent>(
-        `/marketing-contents/${id}`,
-        data
-      );
-    }
+    let payload: Record<string, unknown> = { ...data };
 
-    const formData = await buildContentFormData(
-      data as unknown as Record<string, unknown>,
-      imageFiles,
-      onUploadProgress
-    );
+    if (imageFiles && imageFiles.length > 0) {
+      const chunkedImages = await prepareImageChunks(
+        imageFiles,
+        onUploadProgress
+      );
+      payload = { ...payload, imageChunks: chunkedImages };
+    }
 
     return apiClient.patch<IMarketingContent>(
       `/marketing-contents/${id}`,
-      formData
+      payload
     );
   },
 

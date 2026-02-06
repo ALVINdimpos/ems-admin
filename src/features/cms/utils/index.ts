@@ -18,8 +18,9 @@ export function generateSlug(text: string): string {
 export {
   chunkFile,
   chunkFiles,
-  buildContentFormData,
-  fileToDataUri,
+  prepareImageChunks,
+  fileToBase64,
+  fileToRawBase64,
   type IFileChunk,
   type IChunkedFile,
   type IUploadProgress,
