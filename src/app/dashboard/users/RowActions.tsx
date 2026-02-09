@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Eye,
   Lock,
@@ -26,7 +26,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import Button from "@/components/ui/Button/index";
-import type { User } from "./user-types";
+import type { ApiUser } from "@/features/users/api";
+import {
+  usersApi,
+  USER_TYPES,
+  type CreateUserPayload,
+  type UpdateUserPayload,
+} from "@/features/users/api";
+import { rolesApi, type Role } from "@/features/roles/api";
+import { STORAGE_KEYS } from "@/lib/constants";
 
 function MenuButton({
   children,
@@ -114,7 +122,7 @@ function PermissionsDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: User;
+  user: ApiUser;
 }) {
   const [permissions, setPermissions] = useState<string[]>([
     "institution.update",
@@ -251,52 +259,86 @@ function PermissionsDialog({
 export function AddUserDialog({
   open,
   onOpenChange,
+  onSuccess,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }) {
-  const [country, setCountry] = useState("Rwanda");
-  const [nationalId, setNationalId] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [residentType, setResidentType] = useState("");
-  const [house, setHouse] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [organization, setOrganization] = useState("");
-  const [permissions, setPermissions] = useState<string[]>([]);
-  const [newPermission, setNewPermission] = useState("");
+  const [phoneCountryCode, setPhoneCountryCode] = useState("+250");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [roleId, setRoleId] = useState("");
+  const [userType, setUserType] = useState("");
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    if (!token) return;
+    setRolesLoading(true);
+    rolesApi
+      .list({ limit: 100 }, token)
+      .then((res) => {
+        if (res.success && res.data) setRoles(Array.isArray(res.data) ? res.data : []);
+      })
+      .finally(() => setRolesLoading(false));
+  }, [open]);
 
   function handleClose() {
     onOpenChange(false);
+    setSubmitError(null);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: replace with real API call
+    setSubmitError(null);
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    if (!token) {
+      setSubmitError("Not authenticated");
+      return;
+    }
+    if (!email.trim() || !firstName.trim() || !lastName.trim() || !roleId || !userType) {
+      setSubmitError("Email, first name, last name, role and user type are required");
+      return;
+    }
+    setSubmitLoading(true);
+    const phone = phoneNumber.trim()
+      ? `${phoneCountryCode.replace(/\s/g, "")}${phoneNumber.trim()}`
+      : undefined;
+    const payload: CreateUserPayload = {
+      email: email.trim(),
+      password: "TempPass123!",
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      phone,
+      roleId,
+      userType,
+    };
+    console.log(payload);
+    const res = await usersApi.create(payload, token);
+    setSubmitLoading(false);
+    if (!res.success) {
+      setSubmitError(res.error ?? "Failed to create user");
+      return;
+    }
+    onSuccess?.();
     onOpenChange(false);
-  }
-
-  function addPermission() {
-    if (!newPermission || permissions.includes(newPermission)) return;
-    setPermissions((p) => [...p, newPermission]);
-    setNewPermission("");
-  }
-
-  function removePermission(perm: string) {
-    setPermissions((p) => p.filter((x) => x !== perm));
   }
 
   const inputClass =
     "h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 shadow-sm placeholder:text-slate-400 focus:border-[#1298E5] focus:outline-none";
-
   const selectClass =
     "h-11 w-full appearance-none rounded-2xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-800 shadow-sm focus:border-[#1298E5] focus:outline-none";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl border-0 bg-slate-50 p-0 shadow-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border-0 bg-slate-50 p-0 shadow-2xl">
         <DialogHeader className="px-8 pt-8 pb-0">
           <DialogTitle className="text-2xl font-semibold text-slate-900">
             Add New User
@@ -308,42 +350,13 @@ export function AddUserDialog({
 
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-6 rounded-3xl bg-slate-50 p-8 pt-4">
-            {/* Country */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-600">
-                Country
-              </label>
-              <div className="relative">
-                <select
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  className={selectClass}
-                >
-                  <option value="Rwanda">Rwanda</option>
-                  <option value="Kenya">Kenya</option>
-                  <option value="Uganda">Uganda</option>
-                  <option value="Burundi">Burundi</option>
-                </select>
-                <DropdownIcon />
+            {submitError && (
+              <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {submitError}
               </div>
-            </div>
+            )}
 
-            {/* Grid */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {/* National ID */}
-              <div className="md:col-span-2 space-y-2">
-                <label className="flex gap-1 text-xs font-medium text-slate-600">
-                  National ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  placeholder="Enter a valid Rwanda national ID"
-                  value={nationalId}
-                  onChange={(e) => setNationalId(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-
-              {/* First Name */}
               <div className="space-y-2">
                 <label className="flex gap-1 text-xs font-medium text-slate-600">
                   First Name <span className="text-red-500">*</span>
@@ -355,8 +368,6 @@ export function AddUserDialog({
                   className={inputClass}
                 />
               </div>
-
-              {/* Last Name */}
               <div className="space-y-2">
                 <label className="flex gap-1 text-xs font-medium text-slate-600">
                   Last Name <span className="text-red-500">*</span>
@@ -368,11 +379,9 @@ export function AddUserDialog({
                   className={inputClass}
                 />
               </div>
-
-              {/* Email */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-slate-600">
-                  Email
+                <label className="flex gap-1 text-xs font-medium text-slate-600">
+                  Email <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -382,149 +391,80 @@ export function AddUserDialog({
                   className={inputClass}
                 />
               </div>
-
-              {/* Phone */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-slate-600">
-                  Phone
+                  Phone <span className="text-slate-400">(optional)</span>
                 </label>
-                <input
-                  placeholder="Enter phone number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-
-              {/* Organization */}
-              <div className="space-y-2">
-                <label className="flex gap-1 text-xs font-medium text-slate-600">
-                  Organization <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={organization}
-                    onChange={(e) => setOrganization(e.target.value)}
-                    className={selectClass}
-                  >
-                    <option value="">Select organization</option>
-                    <option value="MINAGRI">MINAGRI</option>
-                    <option value="RICA">RICA</option>
-                    <option value="RDB">RDB</option>
-                  </select>
-                  <DropdownIcon />
-                </div>
-              </div>
-
-              {/* Resident Type */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-slate-600">
-                  Resident Type
-                </label>
-                <div className="relative">
-                  <select
-                    value={residentType}
-                    onChange={(e) => setResidentType(e.target.value)}
-                    className={selectClass}
-                  >
-                    <option value="">Select type</option>
-                    <option value="tenant">Tenant</option>
-                    <option value="owner">Owner</option>
-                    <option value="employee">Employee</option>
-                  </select>
-                  <DropdownIcon />
-                </div>
-              </div>
-
-              {/* House */}
-              <div className="space-y-2">
-                <label className="flex gap-1 text-xs font-medium text-slate-600">
-                  House <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={house}
-                    onChange={(e) => setHouse(e.target.value)}
-                    className={selectClass}
-                  >
-                    <option value="">Select house</option>
-                    <option value="B2-102">B2-102</option>
-                    <option value="B2-103">B2-103</option>
-                    <option value="B2-104">B2-104</option>
-                  </select>
-                  <DropdownIcon />
-                </div>
-              </div>
-
-              {/* Card Number */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-slate-600">
-                  Card Number <span className="text-slate-400">(optional)</span>
-                </label>
-                <input
-                  placeholder="Enter employee card number"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-            </div>
-
-            {/* Permissions Section */}
-            <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
-              <h4 className="text-sm font-semibold text-slate-900">
-                Permissions
-              </h4>
-
-              {/* Add permission */}
-              <div className="flex gap-3">
-                <div className="relative flex-1">
-                  <select
-                    value={newPermission}
-                    onChange={(e) => setNewPermission(e.target.value)}
-                    className={selectClass}
-                  >
-                    <option value="">Select permission</option>
-                    <option value="event.delete">event.delete</option>
-                    <option value="event.update">event.update</option>
-                    <option value="event.create">event.create</option>
-                    <option value="event.view">event.view</option>
-                    <option value="institution.update">institution.update</option>
-                    <option value="branch.create">branch.create</option>
-                  </select>
-                  <DropdownIcon />
-                </div>
-                <button
-                  type="button"
-                  onClick={addPermission}
-                  className="h-11 rounded-2xl bg-[#1298E5] px-6 text-sm font-medium text-white hover:bg-[#0b7cc1]"
-                >
-                  Add
-                </button>
-              </div>
-
-              {/* Permissions list */}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {permissions.length > 0 ? (
-                  permissions.map((perm) => (
-                    <PermissionChip
-                      key={perm}
-                      label={perm}
-                      onDelete={() => removePermission(perm)}
-                    />
-                  ))
-                ) : (
-                  <div className="col-span-full flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 py-6 text-sm text-slate-500">
-                    <span className="font-medium">No permissions assigned</span>
-                    <span className="mt-1 text-xs text-slate-400">
-                      Add permissions using the dropdown above
-                    </span>
+                <div className="flex gap-2">
+                  <div className="relative w-28 shrink-0">
+                    <select
+                      value={phoneCountryCode}
+                      onChange={(e) => setPhoneCountryCode(e.target.value)}
+                      className={selectClass}
+                    >
+                      <option value="+250">+250</option>
+                      <option value="+254">+254</option>
+                      <option value="+256">+256</option>
+                      <option value="+257">+257</option>
+                      <option value="+255">+255</option>
+                    </select>
+                    <DropdownIcon />
                   </div>
-                )}
+                  <input
+                    type="tel"
+                    placeholder="788 123 456"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="flex gap-1 text-xs font-medium text-slate-600">
+                  Role <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={roleId}
+                    onChange={(e) => setRoleId(e.target.value)}
+                    className={selectClass}
+                    disabled={rolesLoading}
+                  >
+                    <option value="">
+                      {rolesLoading ? "Loading roles…" : "Select role"}
+                    </option>
+                    {roles.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                        
+                      </option>
+                    ))}
+                  </select>
+                  <DropdownIcon />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="flex gap-1 text-xs font-medium text-slate-600">
+                  User Type <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={userType}
+                    onChange={(e) => setUserType(e.target.value)}
+                    className={selectClass}
+                  >
+                    <option value="">Select user type</option>
+                    {USER_TYPES.map((t) => (
+                      <option key={t} value={t}>
+                        {t.replace(/_/g, " ")}
+                      </option>
+                    ))}
+                  </select>
+                  <DropdownIcon />
+                </div>
               </div>
             </div>
 
-            {/* Footer */}
             <div className="mt-4 flex justify-end gap-3">
               <button
                 type="button"
@@ -535,9 +475,10 @@ export function AddUserDialog({
               </button>
               <button
                 type="submit"
-                className="h-11 rounded-full bg-[#0b4f7a] px-6 text-sm font-medium text-white hover:bg-[#093d5e]"
+                disabled={submitLoading}
+                className="h-11 rounded-full bg-[#0b4f7a] px-6 text-sm font-medium text-white hover:bg-[#093d5e] disabled:opacity-60"
               >
-                Add User
+                {submitLoading ? "Creating…" : "Add User"}
               </button>
             </div>
           </div>
@@ -551,173 +492,220 @@ export function EditUserDialog({
   open,
   onOpenChange,
   user,
+  onSuccess,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: User;
+  user: ApiUser;
+  onSuccess?: () => void;
 }) {
-  const [country, setCountry] = useState(user.country || "Rwanda");
-  const [nationalId, setNationalId] = useState(user.national_id ?? "");
-  const [firstName, setFirstName] = useState(user.first_name);
-  const [lastName, setLastName] = useState(user.last_name);
+  const [firstName, setFirstName] = useState(user.firstName ?? "");
+  const [lastName, setLastName] = useState(user.lastName ?? "");
   const [email, setEmail] = useState(user.email ?? "");
-  const [phone, setPhone] = useState(user.phone ?? "");
-  const [institution, setInstitution] = useState("Umucyo Estate");
-  const [residentType, setResidentType] = useState("");
-  const [house, setHouse] = useState("B2-102");
-  const [cardNumber, setCardNumber] = useState("");
+  const [phoneCountryCode, setPhoneCountryCode] = useState("+250");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [roleId, setRoleId] = useState("");
+  const [userType, setUserType] = useState("");
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setFirstName(user.firstName ?? "");
+    setLastName(user.lastName ?? "");
+    setEmail(user.email ?? "");
+    const raw = user.phone ?? "";
+    const matched = raw.match(/^(\+250|\+254|\+256|\+257|\+255)(.*)$/);
+    if (matched) {
+      setPhoneCountryCode(matched[1]);
+      setPhoneNumber(matched[2].trim());
+    } else {
+      setPhoneCountryCode("+250");
+      setPhoneNumber(raw.trim());
+    }
+    setSubmitError(null);
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    if (!token) return;
+    setRolesLoading(true);
+    rolesApi
+      .list({ limit: 100 }, token)
+      .then((res) => {
+        if (res.success && res.data) setRoles(Array.isArray(res.data) ? res.data : []);
+      })
+      .finally(() => setRolesLoading(false));
+  }, [open, user.id, user.firstName, user.lastName, user.email, user.phone]);
 
   function handleClose() {
     onOpenChange(false);
+    setSubmitError(null);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitError(null);
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    if (!token) {
+      setSubmitError("Not authenticated");
+      return;
+    }
+    setSubmitLoading(true);
+    const phone = phoneNumber.trim()
+      ? `${phoneCountryCode.replace(/\s/g, "")}${phoneNumber.trim()}`
+      : undefined;
+    const payload: UpdateUserPayload = {
+      firstName: firstName.trim() || undefined,
+      lastName: lastName.trim() || undefined,
+      email: email.trim() || undefined,
+      phone,
+      ...(roleId ? { roleId } : {}),
+      ...(userType ? { userType } : {}),
+    };
+    const res = await usersApi.update(user.id, payload, token);
+    setSubmitLoading(false);
+    if (!res.success) {
+      setSubmitError(res.error ?? "Failed to update user");
+      return;
+    }
+    onSuccess?.();
     onOpenChange(false);
   }
 
   const inputClass =
     "h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 shadow-sm placeholder:text-slate-400 focus:border-[#1298E5] focus:outline-none";
-
   const selectClass =
     "h-11 w-full appearance-none rounded-2xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-800 shadow-sm focus:border-[#1298E5] focus:outline-none";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl rounded-3xl border-0 bg-slate-50 p-0 shadow-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border-0 bg-slate-50 p-0 shadow-2xl">
         <DialogHeader className="px-8 pt-8 pb-0">
           <DialogTitle className="text-2xl font-semibold text-slate-900">
-            Edit Resident
+            Edit User
           </DialogTitle>
           <p className="mt-1 text-sm text-slate-500">
-            Update the details of the resident
+            Update the user details
           </p>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-6 rounded-3xl bg-slate-50 p-8 pt-4">
-            {/* Country */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-600">
-                Country
-              </label>
-              <div className="relative">
-                <select
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  className={selectClass}
-                >
-                  <option value="Rwanda">Rwanda</option>
-                  <option value="Kenya">Kenya</option>
-                  <option value="Uganda">Uganda</option>
-                  <option value="Burundi">Burundi</option>
-                </select>
-                <DropdownIcon />
+            {submitError && (
+              <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {submitError}
               </div>
-            </div>
+            )}
 
-            {/* Grid */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {/* National ID */}
-              <div className="md:col-span-2 space-y-2">
-                <label className="flex gap-1 text-xs font-medium text-slate-600">
-                  National ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  value={nationalId}
-                  onChange={(e) => setNationalId(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-
-              {/* First Name */}
               <div className="space-y-2">
                 <label className="flex gap-1 text-xs font-medium text-slate-600">
-                  First Name <span className="text-red-500">*</span>
+                  First Name
                 </label>
                 <input
+                  placeholder="First name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   className={inputClass}
                 />
               </div>
-
-              {/* Last Name */}
               <div className="space-y-2">
                 <label className="flex gap-1 text-xs font-medium text-slate-600">
-                  Last Name <span className="text-red-500">*</span>
+                  Last Name
                 </label>
                 <input
+                  placeholder="Last name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   className={inputClass}
                 />
               </div>
-
-              {/* Email */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-slate-600">
                   Email
                 </label>
                 <input
                   type="email"
+                  placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={inputClass}
                 />
               </div>
-
-              {/* Phone */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-slate-600">
                   Phone
                 </label>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={inputClass}
-                />
+                <div className="flex gap-2">
+                  <div className="relative w-28 shrink-0">
+                    <select
+                      value={phoneCountryCode}
+                      onChange={(e) => setPhoneCountryCode(e.target.value)}
+                      className={selectClass}
+                    >
+                      <option value="+250">+250</option>
+                      <option value="+254">+254</option>
+                      <option value="+256">+256</option>
+                      <option value="+257">+257</option>
+                      <option value="+255">+255</option>
+                    </select>
+                    <DropdownIcon />
+                  </div>
+                  <input
+                    type="tel"
+                    placeholder="788 123 456"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
               </div>
-
-              {/* Institution */}
               <div className="space-y-2">
-                <label className="flex gap-1 text-xs font-medium text-slate-600">
-                  Institution <span className="text-red-500">*</span>
+                <label className="text-xs font-medium text-slate-600">
+                  Role
                 </label>
                 <div className="relative">
                   <select
-                    value={institution}
-                    onChange={(e) => setInstitution(e.target.value)}
+                    value={roleId}
+                    onChange={(e) => setRoleId(e.target.value)}
                     className={selectClass}
+                    disabled={rolesLoading}
                   >
-                    <option>Umucyo Estate</option>
+                    <option value="">
+                      {rolesLoading ? "Loading roles…" : "Select role"}
+                    </option>
+                    {roles.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                        {r.description ? ` — ${r.description}` : ""}
+                      </option>
+                    ))}
                   </select>
                   <DropdownIcon />
                 </div>
               </div>
-
-              {/* Resident Type */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-slate-600">
-                  Resident Type
+                  User Type
                 </label>
                 <div className="relative">
                   <select
-                    value={residentType}
-                    onChange={(e) => setResidentType(e.target.value)}
+                    value={userType}
+                    onChange={(e) => setUserType(e.target.value)}
                     className={selectClass}
                   >
-                    <option value="">Select type</option>
-                    <option value="tenant">Tenant</option>
-                    <option value="owner">Owner</option>
-                    <option value="employee">Employee</option>
+                    <option value="">Select user type</option>
+                    {USER_TYPES.map((t) => (
+                      <option key={t} value={t}>
+                        {t.replace(/_/g, " ")}
+                      </option>
+                    ))}
                   </select>
                   <DropdownIcon />
                 </div>
               </div>
             </div>
 
-            {/* Footer */}
             <div className="mt-4 flex justify-end gap-3">
               <button
                 type="button"
@@ -726,8 +714,12 @@ export function EditUserDialog({
               >
                 Cancel
               </button>
-              <button className="h-11 rounded-full px-6 text-sm font-medium bg-[#0b4f7a] text-white">
-                Update Member
+              <button
+                type="submit"
+                disabled={submitLoading}
+                className="h-11 rounded-full bg-[#0b4f7a] px-6 text-sm font-medium text-white hover:bg-[#093d5e] disabled:opacity-60"
+              >
+                {submitLoading ? "Updating…" : "Update User"}
               </button>
             </div>
           </div>
@@ -760,7 +752,7 @@ function DeactivateUserDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: User;
+  user: ApiUser;
   onConfirm: () => void;
 }) {
   return (
@@ -771,7 +763,7 @@ function DeactivateUserDialog({
           <AlertDialogDescription>
             Are you sure you want to deactivate{" "}
             <span className="font-medium">
-              {user.first_name} {user.last_name}
+              {user.firstName ?? ""} {user.lastName ?? ""}
             </span>
             ? This user will no longer be able to access the system until
             reactivated.
@@ -800,7 +792,7 @@ function DeleteUserDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: User;
+  user: ApiUser;
   onConfirm: () => void;
 }) {
   return (
@@ -811,7 +803,7 @@ function DeleteUserDialog({
           <AlertDialogDescription>
             Are you sure you want to permanently delete{" "}
             <span className="font-medium">
-              {user.first_name} {user.last_name}
+              {user.firstName ?? ""} {user.lastName ?? ""}
             </span>
             ? This action cannot be undone and all associated data will be lost.
           </AlertDialogDescription>
@@ -831,7 +823,13 @@ function DeleteUserDialog({
   );
 }
 
-export function RowActions({ user }: { user: User }) {
+export function RowActions({
+  user,
+  onUserChange,
+}: {
+  user: ApiUser;
+  onUserChange?: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const [permissionsOpen, setPermissionsOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -914,7 +912,12 @@ export function RowActions({ user }: { user: User }) {
       )}
 
       {/* Edit user modal */}
-      <EditUserDialog open={editOpen} onOpenChange={setEditOpen} user={user} />
+      <EditUserDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        user={user}
+        onSuccess={onUserChange}
+      />
 
       {/* Permissions Modal */}
       <PermissionsDialog
