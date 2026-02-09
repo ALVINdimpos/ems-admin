@@ -77,7 +77,6 @@ export default function UsersPage() {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-console.log(users);
   return (
     <div className="space-y-4">
       {/* Table toolbar */}

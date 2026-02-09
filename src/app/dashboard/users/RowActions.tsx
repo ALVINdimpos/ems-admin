@@ -35,6 +35,7 @@ import {
 } from "@/features/users/api";
 import { rolesApi, type Role } from "@/features/roles/api";
 import { STORAGE_KEYS } from "@/lib/constants";
+import { toast } from "sonner";
 
 function MenuButton({
   children,
@@ -320,13 +321,14 @@ export function AddUserDialog({
       roleId,
       userType,
     };
-    console.log(payload);
     const res = await usersApi.create(payload, token);
+    console.log("Response from create user:", res);
     setSubmitLoading(false);
     if (!res.success) {
       setSubmitError(res.error ?? "Failed to create user");
       return;
     }
+    toast.success("User created successfully");
     onSuccess?.();
     onOpenChange(false);
   }
@@ -559,8 +561,6 @@ export function EditUserDialog({
       lastName: lastName.trim() || undefined,
       email: email.trim() || undefined,
       phone,
-      ...(roleId ? { roleId } : {}),
-      ...(userType ? { userType } : {}),
     };
     const res = await usersApi.update(user.id, payload, token);
     setSubmitLoading(false);
@@ -568,6 +568,7 @@ export function EditUserDialog({
       setSubmitError(res.error ?? "Failed to update user");
       return;
     }
+    toast.success("User updated successfully");
     onSuccess?.();
     onOpenChange(false);
   }
@@ -839,15 +840,43 @@ export function RowActions({
   const closeMenu = () => setOpen(false);
 
   function handleDeactivate() {
-    // TODO: replace with real API call
-    console.log("Deactivating user:", user.id);
-    setDeactivateOpen(false);
+    (async () => {
+      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      if (!token) {
+        toast.error("Not authenticated");
+        return;
+      }
+      const res = await usersApi.update(
+        user.id,
+        { status: "INACTIVE" },
+        token,
+      );
+      if (!res.success) {
+        toast.error(res.error ?? "Failed to deactivate user");
+        return;
+      }
+      toast.success("User deactivated successfully");
+      onUserChange?.();
+      setDeactivateOpen(false);
+    })();
   }
 
   function handleDelete() {
-    // TODO: replace with real API call
-    console.log("Deleting user:", user.id);
-    setDeleteOpen(false);
+    (async () => {
+      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      if (!token) {
+        toast.error("Not authenticated");
+        return;
+      }
+      const res = await usersApi.delete(user.id, token);
+      if (!res.success) {
+        toast.error(res.error ?? "Failed to delete user");
+        return;
+      }
+      toast.success("User deleted successfully");
+      onUserChange?.();
+      setDeleteOpen(false);
+    })();
   }
 
   return (

@@ -38,6 +38,7 @@ export type UpdateUserPayload = {
   lastName?: string;
   email?: string;
   phone?: string;
+  status?: "ACTIVE" | "INACTIVE";
   roleId?: string;
   userType?: string;
 };
@@ -93,6 +94,14 @@ export const usersApi = {
 
   update(id: string, data: UpdateUserPayload, token: string) {
     return apiClient.patch<ApiUser>(`/users/${id}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  },
+
+  delete(id: string, token: string) {
+    return apiClient.delete<void>(`/users/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

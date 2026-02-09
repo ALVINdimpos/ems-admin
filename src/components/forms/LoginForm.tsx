@@ -57,7 +57,6 @@ export default function LoginForm() {
       setApiError(null);
 
       const response = await authApi.login(data);
-      console.log("Login response:", response);
 
       if (!response.success || !response.data?.accessToken) {
         setApiError(response.error || "Invalid email or password.");
@@ -76,7 +75,6 @@ export default function LoginForm() {
 
       if (userId) {
         const userResponse = await usersApi.getById(userId, accessToken);
-        console.log("User info response:", userResponse);
 
         if (userResponse.success && userResponse.data) {
           if (typeof window !== "undefined") {

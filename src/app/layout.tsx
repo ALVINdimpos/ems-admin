@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { LocaleProvider } from "@/providers/LocaleProvider";
+import { Toaster } from "@/components/ui/sonner";
 import "@/styles/globals.css";
 
 const geistSans = Geist({
@@ -33,7 +34,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <LocaleProvider>{children}</LocaleProvider>
+        <LocaleProvider>
+          {children}
+          <Toaster />
+        </LocaleProvider>
       </body>
     </html>
   );
